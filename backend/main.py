@@ -60,10 +60,14 @@ async def health_check():
     }
 
 
-# TODO: Import and include routers
-# from backend.routers import projects, wbs, issues, pending, reports, gantt, notifications
+# Import and include routers
+from backend.routers import wbs
+
+app.include_router(wbs.router, prefix="/api/wbs", tags=["WBS"])
+
+# TODO: Add other routers
+# from backend.routers import projects, issues, pending, reports, gantt, notifications
 # app.include_router(projects.router, prefix="/api/projects", tags=["projects"])
-# app.include_router(wbs.router, prefix="/api/wbs", tags=["wbs"])
 # app.include_router(issues.router, prefix="/api/issues", tags=["issues"])
 # app.include_router(pending.router, prefix="/api/pending", tags=["pending"])
 # app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
