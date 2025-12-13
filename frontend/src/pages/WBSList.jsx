@@ -1,8 +1,9 @@
 /**
  * WBS List Page Component
  */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useWBS } from '../hooks/useWBS'
+import { useExcel } from '../hooks/useExcel'
 import WBSForm from '../components/WBSForm'
 
 const WBSList = () => {
@@ -12,6 +13,8 @@ const WBSList = () => {
   const [filters, setFilters] = useState({
     status: '',
   })
+  const [successMessage, setSuccessMessage] = useState('')
+  const fileInputRef = useRef(null)
 
   const {
     wbsList,
@@ -24,9 +27,24 @@ const WBSList = () => {
     deleteWBS,
   } = useWBS()
 
+  const {
+    loading: excelLoading,
+    error: excelError,
+    importWBSFromExcel,
+    exportWBSToExcel,
+    downloadWBSTemplate,
+  } = useExcel()
+
   useEffect(() => {
     fetchWBS({ project_id: projectId, ...filters })
   }, [fetchWBS, projectId, filters])
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(''), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [successMessage])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -70,6 +88,60 @@ const WBSList = () => {
     setEditingItem(null)
   }
 
+  const handleImportClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!projectId) {
+      alert('請先選擇專案')
+      return
+    }
+
+    try {
+      const result = await importWBSFromExcel(file, projectId)
+      setSuccessMessage(
+        `匯入成功！成功匯入 ${result.imported} 筆，失敗 ${result.failed} 筆`
+      )
+
+      // Refresh WBS list
+      await fetchWBS({ project_id: projectId, ...filters })
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } catch (err) {
+      alert(`匯入失敗: ${err.message}`)
+    }
+  }
+
+  const handleExport = async () => {
+    if (!projectId) {
+      alert('請先選擇專案')
+      return
+    }
+
+    try {
+      await exportWBSToExcel(projectId)
+      setSuccessMessage('匯出成功！')
+    } catch (err) {
+      alert(`匯出失敗: ${err.message}`)
+    }
+  }
+
+  const handleDownloadTemplate = async () => {
+    try {
+      await downloadWBSTemplate()
+      setSuccessMessage('範本下載成功！')
+    } catch (err) {
+      alert(`下載範本失敗: ${err.message}`)
+    }
+  }
+
   const getStatusBadgeColor = (status) => {
     switch (status) {
       case '已完成':
@@ -108,10 +180,42 @@ const WBSList = () => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900">WBS 項目管理</h1>
-          <button onClick={handleCreate} className="btn-primary">
-            + 新增 WBS
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDownloadTemplate}
+              className="btn-secondary"
+              disabled={excelLoading}
+            >
+              📥 下載範本
+            </button>
+            <button
+              onClick={handleImportClick}
+              className="btn-secondary"
+              disabled={excelLoading || !projectId}
+            >
+              📤 匯入 Excel
+            </button>
+            <button
+              onClick={handleExport}
+              className="btn-secondary"
+              disabled={excelLoading || !projectId}
+            >
+              📊 匯出 Excel
+            </button>
+            <button onClick={handleCreate} className="btn-primary">
+              + 新增 WBS
+            </button>
+          </div>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept=".xlsx,.xls"
+          className="hidden"
+        />
 
         {/* Filters */}
         <div className="flex gap-4 items-center">
@@ -157,10 +261,17 @@ const WBSList = () => {
         </div>
       </div>
 
+      {/* Success Message */}
+      {successMessage && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+          {successMessage}
+        </div>
+      )}
+
       {/* Error Message */}
-      {error && (
+      {(error || excelError) && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+          {error || excelError}
         </div>
       )}
 
