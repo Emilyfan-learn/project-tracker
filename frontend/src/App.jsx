@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import ProjectList from './pages/ProjectList'
 import WBSList from './pages/WBSList'
 
 function App() {
@@ -15,6 +16,9 @@ function App() {
               <nav className="flex space-x-4">
                 <Link to="/" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   首頁
+                </Link>
+                <Link to="/projects" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  專案管理
                 </Link>
                 <Link to="/wbs" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   WBS 管理
@@ -36,14 +40,20 @@ function App() {
                       <p className="text-gray-500 mb-4">
                         輕量化的個人專案追蹤管理系統
                       </p>
-                      <Link to="/wbs" className="btn-primary inline-block">
-                        前往 WBS 管理
-                      </Link>
+                      <div className="flex gap-4 justify-center">
+                        <Link to="/projects" className="btn-primary inline-block">
+                          專案管理
+                        </Link>
+                        <Link to="/wbs" className="btn-secondary inline-block">
+                          WBS 管理
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             } />
+            <Route path="/projects" element={<ProjectList />} />
             <Route path="/wbs" element={<WBSList />} />
           </Routes>
         </main>
