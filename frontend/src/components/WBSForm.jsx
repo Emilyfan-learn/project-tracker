@@ -24,6 +24,32 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
   const [errors, setErrors] = useState({})
 
+  // Calculate work days between two dates
+  const calculateWorkDays = (startDate, endDate) => {
+    if (!startDate || !endDate) return null
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null
+
+    const diffTime = Math.abs(end - start)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays + 1 // Include both start and end dates
+  }
+
+  // Calculate work days for each phase
+  const originalPlanDays = calculateWorkDays(
+    formData.original_planned_start,
+    formData.original_planned_end
+  )
+  const revisedPlanDays = calculateWorkDays(
+    formData.revised_planned_start,
+    formData.revised_planned_end
+  )
+  const actualDays = calculateWorkDays(
+    formData.actual_start_date,
+    formData.actual_end_date
+  )
+
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -195,9 +221,16 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
       {/* Schedule - Phase 1: Original Plan */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-700 mb-3">
-          階段 1: 原始計畫
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-gray-700">
+            階段 1: 原始計畫
+          </h3>
+          {originalPlanDays !== null && (
+            <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+              工作天數: {originalPlanDays} 天
+            </span>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="original_planned_start" className="label">
@@ -230,9 +263,16 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
       {/* Schedule - Phase 2: Revised Plan */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-700 mb-3">
-          階段 2: 調整計畫
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-gray-700">
+            階段 2: 調整計畫
+          </h3>
+          {revisedPlanDays !== null && (
+            <span className="text-sm font-medium text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+              工作天數: {revisedPlanDays} 天
+            </span>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="revised_planned_start" className="label">
@@ -265,9 +305,16 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
       {/* Schedule - Phase 3: Actual */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-700 mb-3">
-          階段 3: 實際執行
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-gray-700">
+            階段 3: 實際執行
+          </h3>
+          {actualDays !== null && (
+            <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
+              工作天數: {actualDays} 天
+            </span>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="actual_start_date" className="label">
@@ -297,7 +344,7 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
           </div>
           <div>
             <label htmlFor="work_days" className="label">
-              工作天數
+              工作天數 (可手動輸入)
             </label>
             <input
               type="number"
@@ -306,6 +353,7 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
               value={formData.work_days}
               onChange={handleChange}
               min="0"
+              placeholder={actualDays ? actualDays.toString() : ''}
               className="input-field"
             />
           </div>
