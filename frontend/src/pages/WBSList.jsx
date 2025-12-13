@@ -286,29 +286,38 @@ const WBSList = () => {
       {/* WBS List */}
       {!loading && (
         <>
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="bg-white shadow-md rounded-lg overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     WBS
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     任務名稱
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     負責單位
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    預計開始
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     預計結束
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    調整後開始
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    調整後結束
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     進度
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     狀態
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     操作
                   </th>
                 </tr>
@@ -316,29 +325,46 @@ const WBSList = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {wbsList.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="10" className="px-6 py-4 text-center text-gray-500">
                       暫無資料
                     </td>
                   </tr>
                 ) : (
                   wbsList.map((item) => (
                     <tr key={item.item_id} className={item.is_overdue ? 'bg-red-50' : ''}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {item.wbs_id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {item.task_name}
                         {item.is_overdue && (
                           <span className="ml-2 text-red-500">⚠️</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.owner_unit || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.original_planned_start || '-'}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.original_planned_end || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.revised_planned_start ? (
+                          <span className="text-blue-600">{item.revised_planned_start}</span>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.revised_planned_end ? (
+                          <span className="text-blue-600">{item.revised_planned_end}</span>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
                         <div className="flex items-center">
                           <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                             <div
@@ -354,7 +380,7 @@ const WBSList = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
                             item.status
@@ -363,7 +389,7 @@ const WBSList = () => {
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => handleEdit(item)}
                           className="text-primary-600 hover:text-primary-900 mr-3"
