@@ -25,7 +25,7 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
   // Fetch WBS and Issues for dropdown options
   const { wbsList, fetchWBS } = useWBS()
-  const { issueList, fetchIssues } = useIssues()
+  const { issuesList, fetchIssues } = useIssues()
 
   useEffect(() => {
     if (projectId) {
@@ -333,8 +333,8 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
               className="input-field"
             >
               <option value="">-- 請選擇 Issue --</option>
-              {issueList && issueList.length > 0 ? (
-                issueList.map((issue) => (
+              {issuesList && issuesList.length > 0 ? (
+                issuesList.map((issue) => (
                   <option key={issue.issue_id} value={issue.issue_id}>
                     {issue.issue_number} - {issue.issue_title}
                   </option>
