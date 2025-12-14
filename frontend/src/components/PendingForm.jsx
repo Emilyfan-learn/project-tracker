@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { useWBS } from '../hooks/useWBS'
 import { useIssues } from '../hooks/useIssues'
+import { useProjects } from '../hooks/useProjects'
 
 const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   const [formData, setFormData] = useState({
@@ -26,15 +27,21 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   // Fetch WBS and Issues for dropdown options
   const { wbsList, fetchWBS } = useWBS()
   const { issuesList, fetchIssues } = useIssues()
+  const { projectsList, fetchProjects } = useProjects()
 
   useEffect(() => {
-    if (projectId) {
-      // Fetch WBS and Issues when component mounts or projectId changes
-      fetchWBS({ project_id: projectId, limit: 1000 })
-      fetchIssues({ project_id: projectId, limit: 1000 })
+    fetchProjects()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (formData.project_id) {
+      // Fetch WBS and Issues when project_id changes
+      fetchWBS({ project_id: formData.project_id, limit: 1000 })
+      fetchIssues({ project_id: formData.project_id, limit: 1000 })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId])
+  }, [formData.project_id])
 
   useEffect(() => {
     if (initialData) {
@@ -116,17 +123,29 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
         {/* Project ID */}
         <div>
           <label htmlFor="project_id" className="label">
-            專案 ID *
+            專案 *
           </label>
-          <input
-            type="text"
+          <select
             id="project_id"
             name="project_id"
             value={formData.project_id}
             onChange={handleChange}
             disabled={!!initialData}
             className="input-field"
-          />
+          >
+            {projectsList.length === 0 ? (
+              <option value="">請先建立專案</option>
+            ) : (
+              <>
+                <option value="">請選擇專案</option>
+                {projectsList.map((project) => (
+                  <option key={project.project_id} value={project.project_id}>
+                    {project.project_id} - {project.project_name}
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
           {errors.project_id && (
             <p className="text-red-500 text-sm mt-1">{errors.project_id}</p>
           )}
