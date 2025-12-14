@@ -16,7 +16,7 @@ const IssueList = () => {
   })
 
   const {
-    issueList,
+    issuesList,
     loading,
     error,
     total,
@@ -322,14 +322,14 @@ const IssueList = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {issueList.length === 0 ? (
+                {issuesList.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
                       暫無資料
                     </td>
                   </tr>
                 ) : (
-                  issueList.map((item) => (
+                  issuesList.map((item) => (
                     <tr key={item.issue_id} className={item.is_overdue ? 'bg-red-50' : ''}>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {item.issue_number}
