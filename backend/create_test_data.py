@@ -27,7 +27,12 @@ def create_test_data():
     # 2. 建立 WBS 項目（使用 tracking_items 表）
     print("2. 建立 WBS 項目...")
 
+    # 使用當前日期 (2025)
     today = datetime.now()
+
+    # 先刪除舊資料
+    cursor.execute("DELETE FROM tracking_items WHERE project_id = 'PRJ001'")
+
     wbs_data = [
         # Phase 1: 需求分析 (已完成)
         ('WBS-001', 'PRJ001', 'WBS-001', None, '需求分析', 'Task', 'Phase 1',
@@ -117,6 +122,10 @@ def create_test_data():
 
     # 3. 建立待辦事項
     print("3. 建立待辦事項...")
+
+    # 先刪除舊資料
+    cursor.execute("DELETE FROM pending_items WHERE project_id = 'PRJ001'")
+
     pending_data = [
         ('PRJ001', today.strftime('%Y-%m-%d'), '客戶', '客戶經理',
          '客戶要求修改商品頁面配色', (today + timedelta(days=3)).strftime('%Y-%m-%d'),
@@ -146,6 +155,10 @@ def create_test_data():
 
     # 4. 建立問題追蹤（使用 issue_tracking 表）
     print("4. 建立問題追蹤...")
+
+    # 先刪除舊資料
+    cursor.execute("DELETE FROM issue_tracking WHERE project_id = 'PRJ001'")
+
     issue_data = [
         ('PRJ001', 'API-001', 'API 回應時間過長',
          '商品列表 API 在資料量大時回應時間超過 3 秒',
