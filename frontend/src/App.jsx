@@ -4,6 +4,7 @@ import ProjectList from './pages/ProjectList'
 import WBSList from './pages/WBSList'
 import PendingList from './pages/PendingList'
 import IssueList from './pages/IssueList'
+import GanttView from './pages/GanttView'
 
 function App() {
   return (
@@ -30,6 +31,9 @@ function App() {
                 </Link>
                 <Link to="/issues" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   問題追蹤
+                </Link>
+                <Link to="/gantt" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  甘特圖
                 </Link>
               </nav>
             </div>
@@ -61,6 +65,9 @@ function App() {
                         <Link to="/issues" className="btn-secondary inline-block">
                           問題追蹤
                         </Link>
+                        <Link to="/gantt" className="btn-secondary inline-block">
+                          甘特圖
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -71,6 +78,7 @@ function App() {
             <Route path="/wbs" element={<WBSList />} />
             <Route path="/pending" element={<PendingList />} />
             <Route path="/issues" element={<IssueList />} />
+            <Route path="/gantt" element={<GanttView />} />
           </Routes>
         </main>
       </div>
