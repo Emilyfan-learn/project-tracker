@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { usePending } from '../hooks/usePending'
+import { useProjects } from '../hooks/useProjects'
 import PendingForm from '../components/PendingForm'
 
 const PendingList = () => {
@@ -28,6 +29,15 @@ const PendingList = () => {
     deletePending,
     markAsReplied,
   } = usePending()
+
+  const {
+    projectsList,
+    fetchProjects,
+  } = useProjects()
+
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
 
   useEffect(() => {
     fetchPending({ project_id: projectId, ...filters })
@@ -162,14 +172,25 @@ const PendingList = () => {
             <label htmlFor="project-select" className="label">
               專案
             </label>
-            <input
+            <select
               id="project-select"
-              type="text"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               className="input-field"
-              placeholder="請輸入專案 ID"
-            />
+            >
+              {projectsList.length === 0 ? (
+                <option value="">請先建立專案</option>
+              ) : (
+                <>
+                  <option value="">請選擇專案</option>
+                  {projectsList.map((project) => (
+                    <option key={project.project_id} value={project.project_id}>
+                      {project.project_id} - {project.project_name}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
           </div>
 
           <div>
