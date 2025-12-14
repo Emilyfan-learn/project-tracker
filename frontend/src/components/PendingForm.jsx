@@ -25,7 +25,7 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
   // Fetch WBS and Issues for dropdown options
   const { wbsList, fetchWBS } = useWBS()
-  const { issueList, fetchIssues } = useIssues()
+  const { issuesList, fetchIssues } = useIssues()
 
   useEffect(() => {
     if (projectId) {
@@ -33,7 +33,8 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
       fetchWBS({ project_id: projectId, limit: 1000 })
       fetchIssues({ project_id: projectId, limit: 1000 })
     }
-  }, [projectId, fetchWBS, fetchIssues])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId])
 
   useEffect(() => {
     if (initialData) {
@@ -292,11 +293,15 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
               className="input-field"
             >
               <option value="">-- 請選擇 WBS --</option>
-              {wbsList.map((wbs) => (
-                <option key={wbs.item_id} value={wbs.wbs_id}>
-                  {wbs.wbs_id} - {wbs.task_name}
-                </option>
-              ))}
+              {wbsList && wbsList.length > 0 ? (
+                wbsList.map((wbs) => (
+                  <option key={wbs.item_id} value={wbs.wbs_id}>
+                    {wbs.wbs_id} - {wbs.task_name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>載入中...</option>
+              )}
             </select>
           </div>
 
@@ -329,11 +334,15 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
               className="input-field"
             >
               <option value="">-- 請選擇 Issue --</option>
-              {issueList.map((issue) => (
-                <option key={issue.issue_id} value={issue.issue_id}>
-                  {issue.issue_number} - {issue.issue_title}
-                </option>
-              ))}
+              {issuesList && issuesList.length > 0 ? (
+                issuesList.map((issue) => (
+                  <option key={issue.issue_id} value={issue.issue_id}>
+                    {issue.issue_number} - {issue.issue_title}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>載入中...</option>
+              )}
             </select>
           </div>
         </div>
