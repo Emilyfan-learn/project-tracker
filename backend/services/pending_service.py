@@ -5,7 +5,10 @@ import sqlite3
 from datetime import date, datetime
 from typing import List, Optional, Dict, Any
 from backend.config import settings
-from backend.models.pending import PendingCreate, PendingUpdate, PendingResponse, PendingStats
+from backend.models.pending import (
+    PendingCreate, PendingUpdate, PendingResponse, PendingStats,
+    PendingReplyCreate, PendingReplyResponse, PendingWithReplies
+)
 
 
 class PendingService:
@@ -340,3 +343,74 @@ class PendingService:
             items.append(PendingResponse(**item_dict))
 
         return items
+
+    def add_reply(self, pending_id: int, reply_data: PendingReplyCreate) -> PendingReplyResponse:
+        """Add a reply to a pending item"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        # Check if pending item exists
+        cursor.execute("SELECT pending_id FROM pending_items WHERE pending_id = ?", (pending_id,))
+        if not cursor.fetchone():
+            conn.close()
+            raise ValueError(f"Pending item {pending_id} not found")
+
+        # Insert reply
+        cursor.execute("""
+            INSERT INTO pending_replies (
+                pending_id, reply_date, reply_content, replied_by
+            ) VALUES (?, ?, ?, ?)
+        """, (
+            pending_id,
+            reply_data.reply_date,
+            reply_data.reply_content,
+            reply_data.replied_by
+        ))
+
+        reply_id = cursor.lastrowid
+
+        # Update pending_items to mark as replied (for backward compatibility)
+        cursor.execute("""
+            UPDATE pending_items
+            SET is_replied = 1, actual_reply_date = ?
+            WHERE pending_id = ?
+        """, (reply_data.reply_date, pending_id))
+
+        conn.commit()
+
+        # Get the created reply
+        cursor.execute("SELECT * FROM pending_replies WHERE reply_id = ?", (reply_id,))
+        row = cursor.fetchone()
+        conn.close()
+
+        return PendingReplyResponse(**dict(row))
+
+    def get_replies(self, pending_id: int) -> List[PendingReplyResponse]:
+        """Get all replies for a pending item"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM pending_replies
+            WHERE pending_id = ?
+            ORDER BY reply_date DESC, created_at DESC
+        """, (pending_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [PendingReplyResponse(**dict(row)) for row in rows]
+
+    def get_pending_with_replies(self, pending_id: int) -> Optional[PendingWithReplies]:
+        """Get pending item with all its replies"""
+        pending = self.get_pending_by_id(pending_id)
+        if not pending:
+            return None
+
+        replies = self.get_replies(pending_id)
+
+        return PendingWithReplies(
+            **pending.model_dump(),
+            replies=replies,
+            reply_count=len(replies)
+        )

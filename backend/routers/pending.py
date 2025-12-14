@@ -9,6 +9,9 @@ from backend.models.pending import (
     PendingResponse,
     PendingListResponse,
     PendingStats,
+    PendingReplyCreate,
+    PendingReplyResponse,
+    PendingWithReplies,
 )
 from backend.services.pending_service import PendingService
 
@@ -158,3 +161,46 @@ async def delete_pending(pending_id: int):
     success = pending_service.delete_pending(pending_id)
     if not success:
         raise HTTPException(status_code=404, detail="Pending item not found")
+
+
+@router.post("/{pending_id}/replies", response_model=PendingReplyResponse, status_code=201)
+async def add_reply(pending_id: int, reply_data: PendingReplyCreate):
+    """
+    Add a reply to a pending item
+    
+    - **reply_content**: Reply content (optional)
+    - **replied_by**: Person who replied
+    - **reply_date**: Reply date (defaults to today)
+    """
+    try:
+        return pending_service.add_reply(pending_id, reply_data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/{pending_id}/replies", response_model=List[PendingReplyResponse])
+async def get_replies(pending_id: int):
+    """
+    Get all replies for a pending item
+    
+    Returns list of replies ordered by date (newest first)
+    """
+    try:
+        return pending_service.get_replies(pending_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/{pending_id}/with-replies", response_model=PendingWithReplies)
+async def get_pending_with_replies(pending_id: int):
+    """
+    Get a pending item with all its reply history
+    
+    Returns the pending item along with all replies
+    """
+    pending_with_replies = pending_service.get_pending_with_replies(pending_id)
+    if not pending_with_replies:
+        raise HTTPException(status_code=404, detail="Pending item not found")
+    return pending_with_replies
