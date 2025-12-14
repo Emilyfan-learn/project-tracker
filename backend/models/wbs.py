@@ -83,7 +83,7 @@ class WBSResponse(WBSBase):
     is_overdue: bool = False
 
     # Metadata
-    source: str = "Manual"
+    source: Optional[str] = "Manual"
     source_date: Optional[date] = None
     created_at: datetime
     updated_at: datetime
