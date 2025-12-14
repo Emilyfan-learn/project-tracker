@@ -2,11 +2,13 @@
  * Gantt Chart View Page
  */
 import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useWBS } from '../hooks/useWBS'
 import GanttChart from '../components/GanttChart'
 
 const GanttView = () => {
-  const [projectId, setProjectId] = useState('PRJ001')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [projectId, setProjectId] = useState(searchParams.get('project') || 'PRJ001')
   const [viewMode, setViewMode] = useState('Day')
   const [selectedTask, setSelectedTask] = useState(null)
   const [showTaskDetail, setShowTaskDetail] = useState(false)
@@ -15,9 +17,22 @@ const GanttView = () => {
 
   useEffect(() => {
     if (projectId) {
+      console.log('Fetching WBS for project:', projectId)
       fetchWBS({ project_id: projectId, limit: 1000 })
     }
   }, [projectId, fetchWBS])
+
+  // Update URL when projectId changes
+  useEffect(() => {
+    if (projectId) {
+      setSearchParams({ project: projectId })
+    }
+  }, [projectId, setSearchParams])
+
+  // Log wbsList changes for debugging
+  useEffect(() => {
+    console.log('WBS List updated:', wbsList.length, 'items', wbsList)
+  }, [wbsList])
 
   const handleTaskClick = (task) => {
     setSelectedTask(task)

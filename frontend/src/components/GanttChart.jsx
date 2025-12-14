@@ -10,18 +10,33 @@ const GanttChart = ({ tasks, viewMode = 'Day', onTaskClick, onDateChange }) => {
   const ganttInstance = useRef(null)
 
   useEffect(() => {
-    if (!ganttRef.current || !tasks || tasks.length === 0) return
+    console.log('GanttChart effect triggered:', {
+      hasRef: !!ganttRef.current,
+      tasksCount: tasks?.length || 0,
+      tasks: tasks
+    })
+
+    if (!ganttRef.current || !tasks || tasks.length === 0) {
+      console.log('Skipping Gantt render - missing requirements')
+      return
+    }
 
     // Convert WBS data to Gantt format
-    const ganttTasks = tasks.map((task) => ({
-      id: task.wbs_id,
-      name: task.task_name || task.wbs_id,
-      start: task.revised_planned_start || task.original_planned_start || new Date().toISOString().split('T')[0],
-      end: task.revised_planned_end || task.original_planned_end || new Date().toISOString().split('T')[0],
-      progress: task.actual_progress || 0,
-      dependencies: task.dependencies || '',
-      custom_class: getTaskClass(task),
-    }))
+    const ganttTasks = tasks.map((task) => {
+      const taskData = {
+        id: task.wbs_id,
+        name: task.task_name || task.wbs_id,
+        start: task.revised_planned_start || task.original_planned_start || new Date().toISOString().split('T')[0],
+        end: task.revised_planned_end || task.original_planned_end || new Date().toISOString().split('T')[0],
+        progress: task.actual_progress || 0,
+        dependencies: task.dependencies || '',
+        custom_class: getTaskClass(task),
+      }
+      console.log('Converted task:', task.wbs_id, taskData)
+      return taskData
+    })
+
+    console.log('Gantt tasks prepared:', ganttTasks)
 
     // Destroy existing instance
     if (ganttInstance.current) {
