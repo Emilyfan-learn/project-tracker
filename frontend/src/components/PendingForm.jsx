@@ -292,11 +292,15 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
               className="input-field"
             >
               <option value="">-- 請選擇 WBS --</option>
-              {wbsList.map((wbs) => (
-                <option key={wbs.item_id} value={wbs.wbs_id}>
-                  {wbs.wbs_id} - {wbs.task_name}
-                </option>
-              ))}
+              {wbsList && wbsList.length > 0 ? (
+                wbsList.map((wbs) => (
+                  <option key={wbs.item_id} value={wbs.wbs_id}>
+                    {wbs.wbs_id} - {wbs.task_name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>載入中...</option>
+              )}
             </select>
           </div>
 
@@ -329,11 +333,15 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
               className="input-field"
             >
               <option value="">-- 請選擇 Issue --</option>
-              {issueList.map((issue) => (
-                <option key={issue.issue_id} value={issue.issue_id}>
-                  {issue.issue_number} - {issue.issue_title}
-                </option>
-              ))}
+              {issueList && issueList.length > 0 ? (
+                issueList.map((issue) => (
+                  <option key={issue.issue_id} value={issue.issue_id}>
+                    {issue.issue_number} - {issue.issue_title}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>載入中...</option>
+              )}
             </select>
           </div>
         </div>
