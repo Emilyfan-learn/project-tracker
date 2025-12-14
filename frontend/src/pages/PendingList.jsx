@@ -510,8 +510,14 @@ const PendingList = () => {
                           {item.source_type}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-900 max-w-xs truncate">
-                        {item.description}
+                      <td className="px-4 py-4 text-sm text-gray-900 max-w-xs">
+                        <div className="truncate">{item.description}</div>
+                        {item.related_wbs && (
+                          <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <span className="font-semibold">影響:</span>
+                            <span className="truncate">{item.related_wbs}</span>
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.expected_reply_date || '-'}
