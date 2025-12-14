@@ -175,7 +175,7 @@ const GanttView = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">負責人</label>
-                    <p className="text-gray-900">{selectedTask.responsible_person || '-'}</p>
+                    <p className="text-gray-900">{selectedTask.primary_owner || '-'}</p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">狀態</label>
@@ -209,11 +209,11 @@ const GanttView = () => {
                     <label className="text-sm font-medium text-gray-500">預估進度</label>
                     <p className="text-gray-900">{selectedTask.estimated_progress || 0}%</p>
                   </div>
-                  {selectedTask.variance_progress !== null && (
+                  {selectedTask.progress_variance !== null && selectedTask.progress_variance !== undefined && (
                     <div>
                       <label className="text-sm font-medium text-gray-500">進度差異</label>
-                      <p className={selectedTask.variance_progress < 0 ? 'text-red-600' : 'text-green-600'}>
-                        {selectedTask.variance_progress > 0 ? '+' : ''}{selectedTask.variance_progress}%
+                      <p className={selectedTask.progress_variance < 0 ? 'text-red-600' : 'text-green-600'}>
+                        {selectedTask.progress_variance > 0 ? '+' : ''}{selectedTask.progress_variance}%
                       </p>
                     </div>
                   )}

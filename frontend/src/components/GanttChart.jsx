@@ -23,11 +23,28 @@ const GanttChart = ({ tasks, viewMode = 'Day', onTaskClick, onDateChange }) => {
 
     // Convert WBS data to Gantt format
     const ganttTasks = tasks.map((task) => {
+      // Get dates and ensure they are valid
+      const startDate = task.revised_planned_start || task.original_planned_start || task.actual_start_date
+      const endDate = task.revised_planned_end || task.original_planned_end || task.actual_end_date
+
+      // If no dates available, use today and tomorrow
+      const today = new Date()
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      const start = startDate || today.toISOString().split('T')[0]
+      const end = endDate || tomorrow.toISOString().split('T')[0]
+
+      // Ensure end is after start
+      const startDateTime = new Date(start).getTime()
+      const endDateTime = new Date(end).getTime()
+      const finalEnd = endDateTime > startDateTime ? end : new Date(startDateTime + 86400000).toISOString().split('T')[0]
+
       const taskData = {
         id: task.wbs_id,
         name: task.task_name || task.wbs_id,
-        start: task.revised_planned_start || task.original_planned_start || new Date().toISOString().split('T')[0],
-        end: task.revised_planned_end || task.original_planned_end || new Date().toISOString().split('T')[0],
+        start: start,
+        end: finalEnd,
         progress: task.actual_progress || 0,
         dependencies: task.dependencies || '',
         custom_class: getTaskClass(task),
@@ -46,6 +63,7 @@ const GanttChart = ({ tasks, viewMode = 'Day', onTaskClick, onDateChange }) => {
 
     // Create new Gantt instance
     try {
+      console.log('Creating Gantt instance with', ganttTasks.length, 'tasks')
       ganttInstance.current = new Gantt(ganttRef.current, ganttTasks, {
         view_mode: viewMode,
         bar_height: 30,
@@ -53,17 +71,18 @@ const GanttChart = ({ tasks, viewMode = 'Day', onTaskClick, onDateChange }) => {
         arrow_curve: 5,
         padding: 18,
         date_format: 'YYYY-MM-DD',
-        language: 'zh-TW',
         custom_popup_html: (task) => {
           const originalTask = tasks.find(t => t.wbs_id === task.id)
+          const startDate = task._start ? new Date(task._start).toLocaleDateString('zh-TW') : 'N/A'
+          const endDate = task._end ? new Date(task._end).toLocaleDateString('zh-TW') : 'N/A'
           return `
             <div class="gantt-popup">
               <h3 style="margin: 0 0 10px 0; font-size: 14px;">${task.name}</h3>
               <p style="margin: 5px 0; font-size: 12px;"><strong>WBS ID:</strong> ${task.id}</p>
-              <p style="margin: 5px 0; font-size: 12px;"><strong>開始:</strong> ${task._start.toLocaleDateString('zh-TW')}</p>
-              <p style="margin: 5px 0; font-size: 12px;"><strong>結束:</strong> ${task._end.toLocaleDateString('zh-TW')}</p>
+              <p style="margin: 5px 0; font-size: 12px;"><strong>開始:</strong> ${startDate}</p>
+              <p style="margin: 5px 0; font-size: 12px;"><strong>結束:</strong> ${endDate}</p>
               <p style="margin: 5px 0; font-size: 12px;"><strong>進度:</strong> ${task.progress}%</p>
-              ${originalTask?.responsible_person ? `<p style="margin: 5px 0; font-size: 12px;"><strong>負責人:</strong> ${originalTask.responsible_person}</p>` : ''}
+              ${originalTask?.primary_owner ? `<p style="margin: 5px 0; font-size: 12px;"><strong>負責人:</strong> ${originalTask.primary_owner}</p>` : ''}
               ${originalTask?.status ? `<p style="margin: 5px 0; font-size: 12px;"><strong>狀態:</strong> ${originalTask.status}</p>` : ''}
             </div>
           `
@@ -80,8 +99,11 @@ const GanttChart = ({ tasks, viewMode = 'Day', onTaskClick, onDateChange }) => {
           }
         },
       })
+      console.log('Gantt chart created successfully')
     } catch (error) {
       console.error('Error creating Gantt chart:', error)
+      console.error('Error stack:', error.stack)
+      console.error('Tasks that caused error:', ganttTasks)
     }
 
     return () => {
@@ -96,7 +118,7 @@ const GanttChart = ({ tasks, viewMode = 'Day', onTaskClick, onDateChange }) => {
     if (task.status === '已完成') return 'gantt-bar-complete'
     if (task.status === '進行中') return 'gantt-bar-in-progress'
     if (task.status === '延遲') return 'gantt-bar-delayed'
-    if (task.variance_progress && task.variance_progress < -10) return 'gantt-bar-behind'
+    if (task.progress_variance && task.progress_variance < -10) return 'gantt-bar-behind'
     return ''
   }
 
