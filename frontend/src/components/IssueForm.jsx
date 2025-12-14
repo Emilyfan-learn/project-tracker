@@ -37,7 +37,8 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
       // Fetch WBS when component mounts or projectId changes
       fetchWBS({ project_id: projectId, limit: 1000 })
     }
-  }, [projectId, fetchWBS])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId])
 
   useEffect(() => {
     if (initialData) {

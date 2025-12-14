@@ -33,7 +33,8 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
       fetchWBS({ project_id: projectId, limit: 1000 })
       fetchIssues({ project_id: projectId, limit: 1000 })
     }
-  }, [projectId, fetchWBS, fetchIssues])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId])
 
   useEffect(() => {
     if (initialData) {
