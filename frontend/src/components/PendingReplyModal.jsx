@@ -3,7 +3,7 @@
  * Shows reply history and allows adding new replies
  */
 import React, { useState, useEffect } from 'react'
-import api from '../services/api'
+import api from '../utils/api'
 
 const PendingReplyModal = ({ pendingItem, onClose, onReplyAdded }) => {
   const [replies, setReplies] = useState([])
