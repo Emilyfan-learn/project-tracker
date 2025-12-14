@@ -2,6 +2,8 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import ProjectList from './pages/ProjectList'
 import WBSList from './pages/WBSList'
+import PendingList from './pages/PendingList'
+import IssueList from './pages/IssueList'
 
 function App() {
   return (
@@ -23,6 +25,12 @@ function App() {
                 <Link to="/wbs" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   WBS 管理
                 </Link>
+                <Link to="/pending" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  待辦清單
+                </Link>
+                <Link to="/issues" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  問題追蹤
+                </Link>
               </nav>
             </div>
           </div>
@@ -40,12 +48,18 @@ function App() {
                       <p className="text-gray-500 mb-4">
                         輕量化的個人專案追蹤管理系統
                       </p>
-                      <div className="flex gap-4 justify-center">
+                      <div className="flex gap-4 justify-center flex-wrap">
                         <Link to="/projects" className="btn-primary inline-block">
                           專案管理
                         </Link>
                         <Link to="/wbs" className="btn-secondary inline-block">
                           WBS 管理
+                        </Link>
+                        <Link to="/pending" className="btn-secondary inline-block">
+                          待辦清單
+                        </Link>
+                        <Link to="/issues" className="btn-secondary inline-block">
+                          問題追蹤
                         </Link>
                       </div>
                     </div>
@@ -55,6 +69,8 @@ function App() {
             } />
             <Route path="/projects" element={<ProjectList />} />
             <Route path="/wbs" element={<WBSList />} />
+            <Route path="/pending" element={<PendingList />} />
+            <Route path="/issues" element={<IssueList />} />
           </Routes>
         </main>
       </div>
