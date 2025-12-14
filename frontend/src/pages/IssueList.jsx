@@ -17,6 +17,16 @@ const IssueList = () => {
     severity: '',
     priority: '',
   })
+  const [smartFilters, setSmartFilters] = useState({
+    myResponsibility: false,
+    clientOwner: false,
+    internalOnly: false,
+    overdueOnly: false,
+    escalatedOnly: false,
+    highSeverityOnly: false,
+    highPriorityOnly: false,
+  })
+  const [myUsername, setMyUsername] = useState('') // For "my responsibility" filter
 
   const {
     issuesList,
@@ -185,6 +195,54 @@ const IssueList = () => {
     }
   }
 
+  // Apply smart filters to issues list
+  const getFilteredIssuesList = () => {
+    let filtered = [...issuesList]
+
+    // Filter: Only my responsibility
+    if (smartFilters.myResponsibility && myUsername) {
+      filtered = filtered.filter((item) => item.assigned_to === myUsername)
+    }
+
+    // Filter: Only client owner
+    if (smartFilters.clientOwner) {
+      filtered = filtered.filter((item) => item.owner_type === '客戶')
+    }
+
+    // Filter: Only internal items
+    if (smartFilters.internalOnly) {
+      filtered = filtered.filter((item) => item.owner_type === '內部')
+    }
+
+    // Filter: Only overdue items
+    if (smartFilters.overdueOnly) {
+      filtered = filtered.filter((item) => item.is_overdue === true)
+    }
+
+    // Filter: Only escalated items
+    if (smartFilters.escalatedOnly) {
+      filtered = filtered.filter((item) => item.is_escalated === true)
+    }
+
+    // Filter: High severity only (Critical or High)
+    if (smartFilters.highSeverityOnly) {
+      filtered = filtered.filter(
+        (item) => item.severity === 'Critical' || item.severity === 'High'
+      )
+    }
+
+    // Filter: High priority only (Urgent or High)
+    if (smartFilters.highPriorityOnly) {
+      filtered = filtered.filter(
+        (item) => item.priority === 'Urgent' || item.priority === 'High'
+      )
+    }
+
+    return filtered
+  }
+
+  const filteredIssuesList = getFilteredIssuesList()
+
   if (showForm) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -301,6 +359,140 @@ const IssueList = () => {
             </button>
           </div>
         </div>
+
+        {/* Smart Filters */}
+        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">智慧篩選</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* My Responsibility Filter */}
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center text-sm">
+                <input
+                  type="checkbox"
+                  checked={smartFilters.myResponsibility}
+                  onChange={(e) =>
+                    setSmartFilters({ ...smartFilters, myResponsibility: e.target.checked })
+                  }
+                  className="mr-2 rounded"
+                />
+                <span className="text-gray-700">只看我負責的</span>
+              </label>
+              {smartFilters.myResponsibility && (
+                <input
+                  type="text"
+                  value={myUsername}
+                  onChange={(e) => setMyUsername(e.target.value)}
+                  placeholder="輸入您的姓名"
+                  className="input-field text-sm ml-6"
+                />
+              )}
+            </div>
+
+            {/* Client Owner Filter */}
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                checked={smartFilters.clientOwner}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, clientOwner: e.target.checked })
+                }
+                className="mr-2 rounded"
+              />
+              <span className="text-gray-700">只看客戶責任</span>
+            </label>
+
+            {/* Internal Only Filter */}
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                checked={smartFilters.internalOnly}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, internalOnly: e.target.checked })
+                }
+                className="mr-2 rounded"
+              />
+              <span className="text-gray-700">只看內部項目</span>
+            </label>
+
+            {/* Overdue Only Filter */}
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                checked={smartFilters.overdueOnly}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, overdueOnly: e.target.checked })
+                }
+                className="mr-2 rounded"
+              />
+              <span className="text-gray-700 flex items-center">
+                只看逾期項目
+                <span className="ml-1 text-red-500">⚠️</span>
+              </span>
+            </label>
+
+            {/* Escalated Only Filter */}
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                checked={smartFilters.escalatedOnly}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, escalatedOnly: e.target.checked })
+                }
+                className="mr-2 rounded"
+              />
+              <span className="text-gray-700 flex items-center">
+                只看已升級
+                <span className="ml-1 text-orange-500">⬆️</span>
+              </span>
+            </label>
+
+            {/* High Severity Only Filter */}
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                checked={smartFilters.highSeverityOnly}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, highSeverityOnly: e.target.checked })
+                }
+                className="mr-2 rounded"
+              />
+              <span className="text-gray-700">只看高嚴重性</span>
+            </label>
+
+            {/* High Priority Only Filter */}
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                checked={smartFilters.highPriorityOnly}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, highPriorityOnly: e.target.checked })
+                }
+                className="mr-2 rounded"
+              />
+              <span className="text-gray-700">只看高優先級</span>
+            </label>
+
+            {/* Clear All Filters Button */}
+            {Object.values(smartFilters).some((v) => v) && (
+              <button
+                onClick={() =>
+                  setSmartFilters({
+                    myResponsibility: false,
+                    clientOwner: false,
+                    internalOnly: false,
+                    overdueOnly: false,
+                    escalatedOnly: false,
+                    highSeverityOnly: false,
+                    highPriorityOnly: false,
+                  })
+                }
+                className="text-sm text-primary-600 hover:text-primary-800 underline"
+              >
+                清除所有篩選
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -352,14 +544,14 @@ const IssueList = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {issuesList.length === 0 ? (
+                {filteredIssuesList.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
-                      暫無資料
+                      {issuesList.length === 0 ? '暫無資料' : '無符合篩選條件的資料'}
                     </td>
                   </tr>
                 ) : (
-                  issuesList.map((item) => (
+                  filteredIssuesList.map((item) => (
                     <tr key={item.issue_id} className={item.is_overdue ? 'bg-red-50' : ''}>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {item.issue_number}
@@ -460,7 +652,13 @@ const IssueList = () => {
 
           {/* Summary */}
           <div className="mt-4 text-sm text-gray-600">
-            共 {total} 筆資料
+            {filteredIssuesList.length !== issuesList.length ? (
+              <>
+                顯示 {filteredIssuesList.length} 筆（共 {total} 筆資料）
+              </>
+            ) : (
+              <>共 {total} 筆資料</>
+            )}
           </div>
         </>
       )}
