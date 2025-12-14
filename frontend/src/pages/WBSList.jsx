@@ -2,14 +2,16 @@
  * WBS List Page Component
  */
 import React, { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useWBS } from '../hooks/useWBS'
 import { useExcel } from '../hooks/useExcel'
 import WBSForm from '../components/WBSForm'
 
 const WBSList = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
-  const [projectId, setProjectId] = useState('PRJ001') // Default project
+  const [projectId, setProjectId] = useState(searchParams.get('project') || 'PRJ001')
   const [filters, setFilters] = useState({
     status: '',
   })
@@ -38,6 +40,13 @@ const WBSList = () => {
   useEffect(() => {
     fetchWBS({ project_id: projectId, ...filters })
   }, [fetchWBS, projectId, filters])
+
+  // Update URL when projectId changes
+  useEffect(() => {
+    if (projectId) {
+      setSearchParams({ project: projectId })
+    }
+  }, [projectId, setSearchParams])
 
   useEffect(() => {
     if (successMessage) {

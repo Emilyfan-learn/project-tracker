@@ -2,13 +2,15 @@
  * Issue List Page Component
  */
 import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useIssues } from '../hooks/useIssues'
 import IssueForm from '../components/IssueForm'
 
 const IssueList = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
-  const [projectId, setProjectId] = useState('PRJ001')
+  const [projectId, setProjectId] = useState(searchParams.get('project') || 'PRJ001')
   const [filters, setFilters] = useState({
     status: '',
     severity: '',
@@ -32,6 +34,13 @@ const IssueList = () => {
   useEffect(() => {
     fetchIssues({ project_id: projectId, ...filters })
   }, [fetchIssues, projectId, filters])
+
+  // Update URL when projectId changes
+  useEffect(() => {
+    if (projectId) {
+      setSearchParams({ project: projectId })
+    }
+  }, [projectId, setSearchParams])
 
   const handleCreate = () => {
     setEditingItem(null)

@@ -2,13 +2,15 @@
  * Pending Items List Page Component
  */
 import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { usePending } from '../hooks/usePending'
 import PendingForm from '../components/PendingForm'
 
 const PendingList = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
-  const [projectId, setProjectId] = useState('PRJ001') // Default project
+  const [projectId, setProjectId] = useState(searchParams.get('project') || 'PRJ001')
   const [filters, setFilters] = useState({
     status: '',
     source_type: '',
@@ -30,6 +32,13 @@ const PendingList = () => {
   useEffect(() => {
     fetchPending({ project_id: projectId, ...filters })
   }, [fetchPending, projectId, filters])
+
+  // Update URL when projectId changes
+  useEffect(() => {
+    if (projectId) {
+      setSearchParams({ project: projectId })
+    }
+  }, [projectId, setSearchParams])
 
   const handleCreate = () => {
     setEditingItem(null)
