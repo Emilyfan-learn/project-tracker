@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useWBS } from '../hooks/useWBS'
 import { useExcel } from '../hooks/useExcel'
 import { useProjects } from '../hooks/useProjects'
+import { useIssues } from '../hooks/useIssues'
 import WBSForm from '../components/WBSForm'
 
 const WBSList = () => {
@@ -51,9 +52,20 @@ const WBSList = () => {
     fetchProjects,
   } = useProjects()
 
+  const {
+    issuesList,
+    fetchIssues,
+  } = useIssues()
+
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
+
+  useEffect(() => {
+    if (projectId) {
+      fetchIssues({ project_id: projectId, limit: 1000 })
+    }
+  }, [fetchIssues, projectId])
 
   useEffect(() => {
     fetchWBS({ project_id: projectId, ...filters })
@@ -236,6 +248,18 @@ const WBSList = () => {
   }
 
   const filteredWBSList = getFilteredWBSList()
+
+  // Get count of related issues for a WBS ID
+  const getRelatedIssuesCount = (wbsId) => {
+    if (!issuesList || issuesList.length === 0) return 0
+
+    return issuesList.filter((issue) => {
+      if (!issue.affected_wbs) return false
+      // affected_wbs is a comma-separated string
+      const affectedWBSIds = issue.affected_wbs.split(',').map((id) => id.trim())
+      return affectedWBSIds.includes(wbsId)
+    }).length
+  }
 
   if (showForm) {
     return (
@@ -526,10 +550,23 @@ const WBSList = () => {
                         {item.wbs_id}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.task_name}
-                        {item.is_overdue && (
-                          <span className="ml-2 text-red-500">⚠️</span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <span>{item.task_name}</span>
+                          {item.is_overdue && (
+                            <span className="text-red-500">⚠️</span>
+                          )}
+                          {(() => {
+                            const issueCount = getRelatedIssuesCount(item.wbs_id)
+                            return issueCount > 0 ? (
+                              <span
+                                className="px-2 py-0.5 bg-orange-100 text-orange-800 text-xs rounded-full font-semibold"
+                                title={`${issueCount} 個相關問題`}
+                              >
+                                {issueCount} 問題
+                              </span>
+                            ) : null
+                          })()}
+                        </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.owner_unit || '-'}

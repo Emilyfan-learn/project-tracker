@@ -28,6 +28,7 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   })
 
   const [errors, setErrors] = useState({})
+  const [selectedWBSIds, setSelectedWBSIds] = useState([])
 
   // Fetch WBS for dropdown options
   const { wbsList, fetchWBS } = useWBS()
@@ -48,6 +49,11 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
         reported_date: initialData.reported_date || '',
         estimated_impact_days: initialData.estimated_impact_days || '',
       })
+      // Parse affected_wbs if it exists (comma-separated string)
+      if (initialData.affected_wbs) {
+        const wbsIds = initialData.affected_wbs.split(',').map(id => id.trim()).filter(Boolean)
+        setSelectedWBSIds(wbsIds)
+      }
     }
   }, [initialData])
 
@@ -60,6 +66,22 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }))
     }
+  }
+
+  const handleWBSToggle = (wbsId) => {
+    setSelectedWBSIds((prev) => {
+      if (prev.includes(wbsId)) {
+        // Remove WBS ID
+        return prev.filter((id) => id !== wbsId)
+      } else {
+        // Add WBS ID
+        return [...prev, wbsId]
+      }
+    })
+  }
+
+  const handleRemoveWBS = (wbsId) => {
+    setSelectedWBSIds((prev) => prev.filter((id) => id !== wbsId))
   }
 
   const validate = () => {
@@ -101,6 +123,7 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
     const submitData = {
       ...formData,
       estimated_impact_days: formData.estimated_impact_days ? parseInt(formData.estimated_impact_days) : null,
+      affected_wbs: selectedWBSIds.length > 0 ? selectedWBSIds.join(', ') : null,
     }
 
     Object.keys(submitData).forEach((key) => {
@@ -321,47 +344,84 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
       {/* Impact */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-3">影響範圍</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
-            <label htmlFor="affected_wbs" className="label">
+            <label htmlFor="affected_wbs_selector" className="label">
               受影響的 WBS
             </label>
             <select
-              id="affected_wbs"
-              name="affected_wbs"
-              value={formData.affected_wbs}
-              onChange={handleChange}
+              id="affected_wbs_selector"
+              onChange={(e) => {
+                if (e.target.value) {
+                  handleWBSToggle(e.target.value)
+                  e.target.value = '' // Reset dropdown
+                }
+              }}
               className="input-field"
             >
-              <option value="">-- 請選擇 WBS --</option>
+              <option value="">-- 點擊選擇 WBS --</option>
               {wbsList && wbsList.length > 0 ? (
-                wbsList.map((wbs) => (
-                  <option key={wbs.item_id} value={wbs.wbs_id}>
-                    {wbs.wbs_id} - {wbs.task_name}
-                  </option>
-                ))
+                wbsList
+                  .filter((wbs) => !selectedWBSIds.includes(wbs.wbs_id))
+                  .map((wbs) => (
+                    <option key={wbs.item_id} value={wbs.wbs_id}>
+                      {wbs.wbs_id} - {wbs.task_name}
+                    </option>
+                  ))
               ) : (
-                <option value="" disabled>載入中...</option>
+                <option value="" disabled>
+                  {wbsList ? '無可用的 WBS 項目' : '載入中...'}
+                </option>
               )}
             </select>
+
+            {/* Selected WBS Tags */}
+            {selectedWBSIds.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {selectedWBSIds.map((wbsId) => {
+                  const wbsItem = wbsList.find((w) => w.wbs_id === wbsId)
+                  return (
+                    <div
+                      key={wbsId}
+                      className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                    >
+                      <span>
+                        {wbsId}
+                        {wbsItem && ` - ${wbsItem.task_name}`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveWBS(wbsId)}
+                        className="text-blue-600 hover:text-blue-800 font-bold"
+                        title="移除"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="estimated_impact_days" className="label">
+                預估影響天數
+              </label>
+              <input
+                type="number"
+                id="estimated_impact_days"
+                name="estimated_impact_days"
+                value={formData.estimated_impact_days}
+                onChange={handleChange}
+                min="0"
+                className="input-field"
+              />
+            </div>
           </div>
 
           <div>
-            <label htmlFor="estimated_impact_days" className="label">
-              預估影響天數
-            </label>
-            <input
-              type="number"
-              id="estimated_impact_days"
-              name="estimated_impact_days"
-              value={formData.estimated_impact_days}
-              onChange={handleChange}
-              min="0"
-              className="input-field"
-            />
-          </div>
-
-          <div className="md:col-span-2">
             <label htmlFor="impact_description" className="label">
               影響說明
             </label>
