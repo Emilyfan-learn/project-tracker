@@ -559,10 +559,18 @@ const IssueList = () => {
                           <span className="ml-2 text-orange-500">⬆️</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-900 max-w-xs truncate">
-                        {item.issue_title}
-                        {item.is_overdue && (
-                          <span className="ml-2 text-red-500">⚠️</span>
+                      <td className="px-4 py-4 text-sm text-gray-900 max-w-xs">
+                        <div className="truncate">
+                          {item.issue_title}
+                          {item.is_overdue && (
+                            <span className="ml-2 text-red-500">⚠️</span>
+                          )}
+                        </div>
+                        {item.affected_wbs && (
+                          <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <span className="font-semibold">影響:</span>
+                            <span className="truncate">{item.affected_wbs}</span>
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
