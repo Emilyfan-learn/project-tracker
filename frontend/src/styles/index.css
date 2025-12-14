@@ -43,3 +43,44 @@ body {
 .label {
   @apply block text-sm font-medium text-gray-700 mb-1;
 }
+
+/* Gantt Chart Custom Styles */
+.gantt-container {
+  @apply overflow-x-auto;
+}
+
+.gantt-container .bar {
+  fill: #4f46e5;
+}
+
+.gantt-container .bar-progress {
+  fill: #818cf8;
+}
+
+.gantt-container .bar-label {
+  fill: #1f2937;
+  font-weight: 500;
+}
+
+.gantt-bar-complete .bar {
+  fill: #10b981 !important;
+}
+
+.gantt-bar-in-progress .bar {
+  fill: #3b82f6 !important;
+}
+
+.gantt-bar-delayed .bar {
+  fill: #f59e0b !important;
+}
+
+.gantt-bar-behind .bar {
+  fill: #ef4444 !important;
+}
+
+.gantt-popup {
+  padding: 12px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
