@@ -297,7 +297,8 @@ const ProjectList = () => {
                       </button>
                       <button
                         onClick={() => handleDelete(project)}
-                        className="px-3 text-red-600 hover:bg-red-50 rounded-md text-sm"
+                        className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md text-sm font-medium transition-colors"
+                        title="刪除專案"
                       >
                         刪除
                       </button>
