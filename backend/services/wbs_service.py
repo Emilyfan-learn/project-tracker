@@ -25,13 +25,33 @@ class WBSService:
         return f"{project_id}_{wbs_id}"
 
     def _calculate_progress_metrics(self, item: Dict[str, Any]) -> Dict[str, Any]:
-        """Calculate estimated progress and variance"""
+        """Calculate estimated progress and variance
+
+        Priority logic for date selection:
+        1. If both revised_planned_start and revised_planned_end exist, use them
+        2. Otherwise, use original_planned_start and original_planned_end
+
+        This ensures that when schedule is adjusted, calculations reflect the new timeline.
+        """
+        # Determine which dates to use for calculation
+        start_date = None
+        end_date = None
+
+        # Priority 1: Use revised plan if both start and end are available
+        if item.get('revised_planned_start') and item.get('revised_planned_end'):
+            start_date = item['revised_planned_start']
+            end_date = item['revised_planned_end']
+        # Priority 2: Use original plan
+        elif item.get('original_planned_start') and item.get('original_planned_end'):
+            start_date = item['original_planned_start']
+            end_date = item['original_planned_end']
+
         # Calculate estimated progress based on dates
         estimated_progress = 0
-        if item.get('original_planned_start') and item.get('original_planned_end'):
+        if start_date and end_date:
             try:
-                start = datetime.strptime(item['original_planned_start'], '%Y-%m-%d').date()
-                end = datetime.strptime(item['original_planned_end'], '%Y-%m-%d').date()
+                start = datetime.strptime(start_date, '%Y-%m-%d').date()
+                end = datetime.strptime(end_date, '%Y-%m-%d').date()
                 today = date.today()
 
                 if today >= end:
@@ -50,12 +70,14 @@ class WBSService:
         progress_variance = actual_progress - estimated_progress
 
         # Check if overdue
+        # Priority: Use revised end date if available, otherwise use original end date
         is_overdue = False
         if item.get('status') != '已完成':
-            if item.get('original_planned_end'):
+            overdue_check_date = item.get('revised_planned_end') or item.get('original_planned_end')
+            if overdue_check_date:
                 try:
-                    end_date = datetime.strptime(item['original_planned_end'], '%Y-%m-%d').date()
-                    is_overdue = date.today() > end_date
+                    end_date_obj = datetime.strptime(overdue_check_date, '%Y-%m-%d').date()
+                    is_overdue = date.today() > end_date_obj
                 except ValueError:
                     pass
 
