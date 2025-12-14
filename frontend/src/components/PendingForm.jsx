@@ -2,6 +2,8 @@
  * Pending Item Form Component
  */
 import React, { useState, useEffect } from 'react'
+import { useWBS } from '../hooks/useWBS'
+import { useIssues } from '../hooks/useIssues'
 
 const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   const [formData, setFormData] = useState({
@@ -20,6 +22,18 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   })
 
   const [errors, setErrors] = useState({})
+
+  // Fetch WBS and Issues for dropdown options
+  const { wbsList, fetchWBS } = useWBS()
+  const { issueList, fetchIssues } = useIssues()
+
+  useEffect(() => {
+    if (projectId) {
+      // Fetch WBS and Issues when component mounts or projectId changes
+      fetchWBS({ project_id: projectId, limit: 1000 })
+      fetchIssues({ project_id: projectId, limit: 1000 })
+    }
+  }, [projectId, fetchWBS, fetchIssues])
 
   useEffect(() => {
     if (initialData) {
@@ -270,15 +284,20 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
             <label htmlFor="related_wbs" className="label">
               關聯 WBS
             </label>
-            <input
-              type="text"
+            <select
               id="related_wbs"
               name="related_wbs"
               value={formData.related_wbs}
               onChange={handleChange}
-              placeholder="例如: 2.1, 3.2"
               className="input-field"
-            />
+            >
+              <option value="">-- 請選擇 WBS --</option>
+              {wbsList.map((wbs) => (
+                <option key={wbs.item_id} value={wbs.wbs_id}>
+                  {wbs.wbs_id} - {wbs.task_name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Related Action Item */}
@@ -292,6 +311,7 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
               name="related_action_item"
               value={formData.related_action_item}
               onChange={handleChange}
+              placeholder="手動輸入 Action Item"
               className="input-field"
             />
           </div>
@@ -299,17 +319,22 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
           {/* Related Issue */}
           <div>
             <label htmlFor="related_issue_id" className="label">
-              關聯 Issue ID
+              關聯 Issue
             </label>
-            <input
-              type="number"
+            <select
               id="related_issue_id"
               name="related_issue_id"
               value={formData.related_issue_id}
               onChange={handleChange}
-              min="0"
               className="input-field"
-            />
+            >
+              <option value="">-- 請選擇 Issue --</option>
+              {issueList.map((issue) => (
+                <option key={issue.issue_id} value={issue.issue_id}>
+                  {issue.issue_number} - {issue.issue_title}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

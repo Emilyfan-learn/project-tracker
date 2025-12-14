@@ -2,6 +2,7 @@
  * Issue Form Component
  */
 import React, { useState, useEffect } from 'react'
+import { useWBS } from '../hooks/useWBS'
 
 const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   const [formData, setFormData] = useState({
@@ -27,6 +28,16 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   })
 
   const [errors, setErrors] = useState({})
+
+  // Fetch WBS for dropdown options
+  const { wbsList, fetchWBS } = useWBS()
+
+  useEffect(() => {
+    if (projectId) {
+      // Fetch WBS when component mounts or projectId changes
+      fetchWBS({ project_id: projectId, limit: 1000 })
+    }
+  }, [projectId, fetchWBS])
 
   useEffect(() => {
     if (initialData) {
@@ -314,15 +325,20 @@ const IssueForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
             <label htmlFor="affected_wbs" className="label">
               受影響的 WBS
             </label>
-            <input
-              type="text"
+            <select
               id="affected_wbs"
               name="affected_wbs"
               value={formData.affected_wbs}
               onChange={handleChange}
-              placeholder="例如: 2.1, 3.2, 4.1"
               className="input-field"
-            />
+            >
+              <option value="">-- 請選擇 WBS --</option>
+              {wbsList.map((wbs) => (
+                <option key={wbs.item_id} value={wbs.wbs_id}>
+                  {wbs.wbs_id} - {wbs.task_name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
