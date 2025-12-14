@@ -35,7 +35,7 @@ def create_test_data():
 
     wbs_data = [
         # Phase 1: 需求分析 (已完成)
-        ('WBS-001', 'PRJ001', 'WBS-001', None, '需求分析', 'Task', 'Phase 1',
+        ('WBS-001', 'PRJ001', 'WBS-001', None, '需求分析', 'WBS', 'Phase 1',
          None, None, '王小明', None,
          (today - timedelta(days=30)).strftime('%Y-%m-%d'),
          (today - timedelta(days=15)).strftime('%Y-%m-%d'),
@@ -45,7 +45,7 @@ def create_test_data():
          15, 100, 100, 0, '已完成', 0, None, None, None, None, None),
 
         # Phase 2: 系統設計 (已完成)
-        ('WBS-002', 'PRJ001', 'WBS-002', None, '系統架構設計', 'Task', 'Phase 2',
+        ('WBS-002', 'PRJ001', 'WBS-002', None, '系統架構設計', 'WBS', 'Phase 2',
          None, None, '張工程師', None,
          (today - timedelta(days=14)).strftime('%Y-%m-%d'),
          (today - timedelta(days=7)).strftime('%Y-%m-%d'),
@@ -54,7 +54,7 @@ def create_test_data():
          (today - timedelta(days=5)).strftime('%Y-%m-%d'),
          9, 100, 100, 0, '已完成', 0, None, None, None, None, None),
 
-        ('WBS-003', 'PRJ001', 'WBS-003', None, '資料庫設計', 'Task', 'Phase 2',
+        ('WBS-003', 'PRJ001', 'WBS-003', None, '資料庫設計', 'WBS', 'Phase 2',
          None, None, '張工程師', None,
          (today - timedelta(days=10)).strftime('%Y-%m-%d'),
          (today - timedelta(days=5)).strftime('%Y-%m-%d'),
@@ -64,7 +64,7 @@ def create_test_data():
          7, 100, 100, 0, '已完成', 0, None, None, None, None, None),
 
         # Phase 3: 開發中
-        ('WBS-004', 'PRJ001', 'WBS-004', None, '前端開發 - 商品頁面', 'Task', 'Phase 3',
+        ('WBS-004', 'PRJ001', 'WBS-004', None, '前端開發 - 商品頁面', 'WBS', 'Phase 3',
          None, None, '陳前端', None,
          (today - timedelta(days=5)).strftime('%Y-%m-%d'),
          (today + timedelta(days=10)).strftime('%Y-%m-%d'),
@@ -73,7 +73,7 @@ def create_test_data():
          None,
          None, 60, 50, 10, '進行中', 0, None, None, None, None, None),
 
-        ('WBS-005', 'PRJ001', 'WBS-005', None, '後端開發 - API 實作', 'Task', 'Phase 3',
+        ('WBS-005', 'PRJ001', 'WBS-005', None, '後端開發 - API 實作', 'WBS', 'Phase 3',
          None, None, '林後端', None,
          (today - timedelta(days=3)).strftime('%Y-%m-%d'),
          (today + timedelta(days=12)).strftime('%Y-%m-%d'),
@@ -82,7 +82,7 @@ def create_test_data():
          None,
          None, 45, 30, 15, '進行中', 0, None, None, None, None, None),
 
-        ('WBS-006', 'PRJ001', 'WBS-006', None, '金流整合', 'Task', 'Phase 3',
+        ('WBS-006', 'PRJ001', 'WBS-006', None, '金流整合', 'WBS', 'Phase 3',
          None, None, '林後端', None,
          (today + timedelta(days=5)).strftime('%Y-%m-%d'),
          (today + timedelta(days=20)).strftime('%Y-%m-%d'),
@@ -91,7 +91,7 @@ def create_test_data():
          None, 0, 0, 0, '未開始', 0, None, None, None, None, None),
 
         # Phase 4: 測試
-        ('WBS-007', 'PRJ001', 'WBS-007', None, '單元測試', 'Task', 'Phase 4',
+        ('WBS-007', 'PRJ001', 'WBS-007', None, '單元測試', 'WBS', 'Phase 4',
          None, None, '測試團隊', None,
          (today + timedelta(days=15)).strftime('%Y-%m-%d'),
          (today + timedelta(days=25)).strftime('%Y-%m-%d'),
@@ -99,7 +99,7 @@ def create_test_data():
          None, None,
          None, 0, 0, 0, '未開始', 0, None, None, None, None, None),
 
-        ('WBS-008', 'PRJ001', 'WBS-008', None, '整合測試', 'Task', 'Phase 4',
+        ('WBS-008', 'PRJ001', 'WBS-008', None, '整合測試', 'WBS', 'Phase 4',
          None, None, '測試團隊', None,
          (today + timedelta(days=26)).strftime('%Y-%m-%d'),
          (today + timedelta(days=35)).strftime('%Y-%m-%d'),
