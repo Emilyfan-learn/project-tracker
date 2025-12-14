@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useWBS } from '../hooks/useWBS'
+import { useProjects } from '../hooks/useProjects'
 import GanttChart from '../components/GanttChart'
 
 const GanttView = () => {
@@ -14,6 +15,15 @@ const GanttView = () => {
   const [showTaskDetail, setShowTaskDetail] = useState(false)
 
   const { wbsList, loading, error, fetchWBS } = useWBS()
+
+  const {
+    projectsList,
+    fetchProjects,
+  } = useProjects()
+
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
 
   useEffect(() => {
     if (projectId) {
@@ -64,16 +74,27 @@ const GanttView = () => {
           {/* Project Selection */}
           <div>
             <label htmlFor="project-select" className="label">
-              專案 ID
+              專案
             </label>
-            <input
+            <select
               id="project-select"
-              type="text"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               className="input-field"
-              placeholder="請輸入專案 ID"
-            />
+            >
+              {projectsList.length === 0 ? (
+                <option value="">請先建立專案</option>
+              ) : (
+                <>
+                  <option value="">請選擇專案</option>
+                  {projectsList.map((project) => (
+                    <option key={project.project_id} value={project.project_id}>
+                      {project.project_id} - {project.project_name}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
           </div>
 
           {/* View Mode Selection */}
@@ -179,7 +200,12 @@ const GanttView = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">狀態</label>
-                    <p className="text-gray-900">{selectedTask.status || '-'}</p>
+                    <p className="text-gray-900">
+                      {selectedTask.status || '-'}
+                      {selectedTask.is_overdue && (
+                        <span className="ml-2 text-red-600 font-semibold">逾期</span>
+                      )}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">預計開始</label>
