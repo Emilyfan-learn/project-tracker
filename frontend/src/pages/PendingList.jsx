@@ -6,11 +6,14 @@ import { useSearchParams } from 'react-router-dom'
 import { usePending } from '../hooks/usePending'
 import { useProjects } from '../hooks/useProjects'
 import PendingForm from '../components/PendingForm'
+import PendingReplyModal from '../components/PendingReplyModal'
 
 const PendingList = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [showReplyModal, setShowReplyModal] = useState(false)
+  const [selectedItem, setSelectedItem] = useState(null)
   const [projectId, setProjectId] = useState(searchParams.get('project') || 'PRJ001')
   const [filters, setFilters] = useState({
     status: '',
@@ -546,16 +549,16 @@ const PendingList = () => {
                         </span>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm">
-                        {item.is_replied ? (
-                          <span className="text-green-600">✓ 已回覆</span>
-                        ) : (
-                          <button
-                            onClick={() => handleMarkReplied(item.pending_id)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            標記已回覆
-                          </button>
-                        )}
+                        <button
+                          onClick={() => {
+                            setSelectedItem(item)
+                            setShowReplyModal(true)
+                          }}
+                          className="text-blue-600 hover:text-blue-900 underline"
+                        >
+                          查看回覆
+                          {item.is_replied && <span className="text-green-600 ml-1">✓</span>}
+                        </button>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                         <button
@@ -589,6 +592,21 @@ const PendingList = () => {
             )}
           </div>
         </>
+      )}
+
+      {/* Reply Modal */}
+      {showReplyModal && selectedItem && (
+        <PendingReplyModal
+          pendingItem={selectedItem}
+          onClose={() => {
+            setShowReplyModal(false)
+            setSelectedItem(null)
+          }}
+          onReplyAdded={() => {
+            // Refresh the pending list
+            fetchPending({ project_id: projectId, ...filters })
+          }}
+        />
       )}
     </div>
   )

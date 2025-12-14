@@ -2,7 +2,7 @@
 Pydantic models for Pending Items management
 """
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
 
 
@@ -91,3 +91,29 @@ class PendingStats(BaseModel):
     low_priority: int
 
     by_source: dict  # 按來源統計
+
+
+class PendingReplyCreate(BaseModel):
+    """Model for creating a pending reply"""
+    reply_content: Optional[str] = Field(None, description="Reply content")
+    replied_by: str = Field(..., description="Person who replied")
+    reply_date: date = Field(default_factory=date.today, description="Reply date")
+
+
+class PendingReplyResponse(BaseModel):
+    """Model for pending reply response"""
+    reply_id: int
+    pending_id: int
+    reply_date: date
+    reply_content: Optional[str] = None
+    replied_by: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PendingWithReplies(PendingResponse):
+    """Model for pending item with reply history"""
+    replies: List[PendingReplyResponse] = []
+    reply_count: int = 0
