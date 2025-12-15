@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { usePending } from '../hooks/usePending'
 import { useProjects } from '../hooks/useProjects'
+import { useExcel } from '../hooks/useExcel'
 import PendingForm from '../components/PendingForm'
 import PendingReplyModal from '../components/PendingReplyModal'
 
@@ -46,6 +47,11 @@ const PendingList = () => {
     projectsList,
     fetchProjects,
   } = useProjects()
+
+  const {
+    loading: excelLoading,
+    exportPendingToExcel,
+  } = useExcel()
 
   useEffect(() => {
     fetchProjects()
@@ -231,9 +237,29 @@ const PendingList = () => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900">待辦清單管理</h1>
-          <button onClick={handleCreate} className="btn-primary">
-            + 新增待辦項目
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                if (!projectId) {
+                  alert('請先選擇專案')
+                  return
+                }
+                try {
+                  await exportPendingToExcel(projectId)
+                  alert('匯出成功')
+                } catch (err) {
+                  alert(`匯出失敗: ${err.message}`)
+                }
+              }}
+              disabled={excelLoading}
+              className="btn-secondary"
+            >
+              {excelLoading ? '匯出中...' : '📥 匯出 Excel'}
+            </button>
+            <button onClick={handleCreate} className="btn-primary">
+              + 新增待辦項目
+            </button>
+          </div>
         </div>
 
         {/* Filters */}

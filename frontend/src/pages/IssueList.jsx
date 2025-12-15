@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useIssues } from '../hooks/useIssues'
 import { useProjects } from '../hooks/useProjects'
+import { useExcel } from '../hooks/useExcel'
 import IssueForm from '../components/IssueForm'
 
 const IssueList = () => {
@@ -46,6 +47,11 @@ const IssueList = () => {
     projectsList,
     fetchProjects,
   } = useProjects()
+
+  const {
+    loading: excelLoading,
+    exportIssuesToExcel,
+  } = useExcel()
 
   useEffect(() => {
     fetchProjects()
@@ -272,9 +278,29 @@ const IssueList = () => {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900">問題追蹤管理</h1>
-          <button onClick={handleCreate} className="btn-primary">
-            + 新增問題
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                if (!projectId) {
+                  alert('請先選擇專案')
+                  return
+                }
+                try {
+                  await exportIssuesToExcel(projectId)
+                  alert('匯出成功')
+                } catch (err) {
+                  alert(`匯出失敗: ${err.message}`)
+                }
+              }}
+              disabled={excelLoading}
+              className="btn-secondary"
+            >
+              {excelLoading ? '匯出中...' : '📥 匯出 Excel'}
+            </button>
+            <button onClick={handleCreate} className="btn-primary">
+              + 新增問題
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
