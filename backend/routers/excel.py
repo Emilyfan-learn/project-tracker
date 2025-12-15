@@ -162,9 +162,11 @@ async def export_pending_to_excel(project_id: str):
     Returns downloadable Excel file
     """
     try:
+        from urllib.parse import quote
+
         # Create temporary file for export
         tmp_dir = tempfile.mkdtemp()
-        output_path = os.path.join(tmp_dir, f"待辦事項_{project_id}.xlsx")
+        output_path = os.path.join(tmp_dir, f"pending_{project_id}.xlsx")
 
         # Export to Excel
         result = excel_service.export_pending_to_excel(project_id, output_path)
@@ -175,13 +177,17 @@ async def export_pending_to_excel(project_id: str):
         if not os.path.exists(output_path):
             raise HTTPException(status_code=500, detail="Export file was not created")
 
+        # Use URL-encoded filename for Chinese characters
+        chinese_filename = f"待辦事項_{project_id}.xlsx"
+        encoded_filename = quote(chinese_filename)
+
         # Return file for download
         return FileResponse(
             path=output_path,
-            filename=f"待辦事項_{project_id}.xlsx",
+            filename=chinese_filename,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={
-                "Content-Disposition": f"attachment; filename=待辦事項_{project_id}.xlsx"
+                "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
             }
         )
 
@@ -206,9 +212,11 @@ async def export_issues_to_excel(project_id: str):
     Returns downloadable Excel file
     """
     try:
+        from urllib.parse import quote
+
         # Create temporary file for export
         tmp_dir = tempfile.mkdtemp()
-        output_path = os.path.join(tmp_dir, f"問題追蹤_{project_id}.xlsx")
+        output_path = os.path.join(tmp_dir, f"issues_{project_id}.xlsx")
 
         # Export to Excel
         result = excel_service.export_issues_to_excel(project_id, output_path)
@@ -219,13 +227,17 @@ async def export_issues_to_excel(project_id: str):
         if not os.path.exists(output_path):
             raise HTTPException(status_code=500, detail="Export file was not created")
 
+        # Use URL-encoded filename for Chinese characters
+        chinese_filename = f"問題追蹤_{project_id}.xlsx"
+        encoded_filename = quote(chinese_filename)
+
         # Return file for download
         return FileResponse(
             path=output_path,
-            filename=f"問題追蹤_{project_id}.xlsx",
+            filename=chinese_filename,
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             headers={
-                "Content-Disposition": f"attachment; filename=問題追蹤_{project_id}.xlsx"
+                "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
             }
         )
 
