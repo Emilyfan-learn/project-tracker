@@ -77,6 +77,8 @@ const PendingList = () => {
       try {
         await deletePending(item.pending_id)
         alert('刪除成功')
+        // Refresh the pending list
+        fetchPending({ project_id: projectId, ...filters })
       } catch (err) {
         alert(`刪除失敗: ${err.message}`)
       }
@@ -94,6 +96,8 @@ const PendingList = () => {
       }
       setShowForm(false)
       setEditingItem(null)
+      // Refresh the pending list to show the new/updated item
+      fetchPending({ project_id: projectId, ...filters })
     } catch (err) {
       alert(`操作失敗: ${err.message}`)
     }
@@ -108,6 +112,8 @@ const PendingList = () => {
     try {
       await markAsReplied(pendingId, new Date().toISOString().split('T')[0])
       alert('已標記為已回覆')
+      // Refresh the pending list
+      fetchPending({ project_id: projectId, ...filters })
     } catch (err) {
       alert(`標記失敗: ${err.message}`)
     }
