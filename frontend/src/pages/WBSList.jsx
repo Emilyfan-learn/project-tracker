@@ -100,6 +100,8 @@ const WBSList = () => {
       try {
         await deleteWBS(item.item_id)
         alert('刪除成功')
+        // Refresh the WBS list
+        fetchWBS({ project_id: projectId, ...filters })
       } catch (err) {
         alert(`刪除失敗: ${err.message}`)
       }
@@ -117,6 +119,8 @@ const WBSList = () => {
       }
       setShowForm(false)
       setEditingItem(null)
+      // Refresh the WBS list to show the new/updated item
+      fetchWBS({ project_id: projectId, ...filters })
     } catch (err) {
       alert(`操作失敗: ${err.message}`)
     }

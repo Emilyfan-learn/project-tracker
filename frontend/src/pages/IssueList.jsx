@@ -77,6 +77,8 @@ const IssueList = () => {
       try {
         await deleteIssue(item.issue_id)
         alert('刪除成功')
+        // Refresh the issue list
+        fetchIssues({ project_id: projectId, ...filters })
       } catch (err) {
         alert(`刪除失敗: ${err.message}`)
       }
@@ -94,6 +96,8 @@ const IssueList = () => {
       }
       setShowForm(false)
       setEditingItem(null)
+      // Refresh the issue list to show the new/updated item
+      fetchIssues({ project_id: projectId, ...filters })
     } catch (err) {
       alert(`操作失敗: ${err.message}`)
     }
@@ -113,6 +117,8 @@ const IssueList = () => {
       try {
         await escalateIssue(issueId, { escalation_level: level, escalation_reason: reason, changed_by: changedBy })
         alert('升級成功')
+        // Refresh the issue list
+        fetchIssues({ project_id: projectId, ...filters })
       } catch (err) {
         alert(`升級失敗: ${err.message}`)
       }
@@ -127,6 +133,8 @@ const IssueList = () => {
       try {
         await resolveIssue(issueId, { resolution, resolved_by: resolvedBy })
         alert('已標記為已解決')
+        // Refresh the issue list
+        fetchIssues({ project_id: projectId, ...filters })
       } catch (err) {
         alert(`標記失敗: ${err.message}`)
       }
@@ -140,6 +148,8 @@ const IssueList = () => {
       try {
         await closeIssue(issueId, { closed_by: closedBy })
         alert('已關閉問題')
+        // Refresh the issue list
+        fetchIssues({ project_id: projectId, ...filters })
       } catch (err) {
         alert(`關閉失敗: ${err.message}`)
       }
