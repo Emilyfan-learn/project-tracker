@@ -8,6 +8,7 @@ import DependencyManagement from './pages/DependencyManagement'
 import PendingList from './pages/PendingList'
 import IssueList from './pages/IssueList'
 import GanttView from './pages/GanttView'
+import BackupManagement from './pages/BackupManagement'
 
 function App() {
   return (
@@ -44,6 +45,9 @@ function App() {
                 <Link to="/gantt" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   甘特圖
                 </Link>
+                <Link to="/backup" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  備份管理
+                </Link>
               </nav>
             </div>
           </div>
@@ -58,6 +62,7 @@ function App() {
             <Route path="/pending" element={<PendingList />} />
             <Route path="/issues" element={<IssueList />} />
             <Route path="/gantt" element={<GanttView />} />
+            <Route path="/backup" element={<BackupManagement />} />
           </Routes>
         </main>
       </div>
