@@ -272,7 +272,21 @@ def create_database_schema():
         )
     """)
 
-    # 8. Notifications table
+    # 8. Pending replies table (for tracking multiple replies to pending items)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pending_replies (
+            reply_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pending_id INTEGER NOT NULL,
+            reply_date DATE NOT NULL,
+            reply_content TEXT,
+            replied_by TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (pending_id) REFERENCES pending_items(pending_id) ON DELETE CASCADE
+        )
+    """)
+
+    # 9. Notifications table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS notifications (
             notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -311,6 +325,8 @@ def create_database_schema():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_dependencies_active ON item_dependencies(is_active)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_pending_items_project ON pending_items(project_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_pending_items_status ON pending_items(status)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_pending_replies_pending_id ON pending_replies(pending_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_pending_replies_reply_date ON pending_replies(reply_date)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_issue_tracking_project ON issue_tracking(project_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_issue_tracking_status ON issue_tracking(status)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(notification_type)")
