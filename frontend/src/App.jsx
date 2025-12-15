@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import ProjectList from './pages/ProjectList'
 import WBSList from './pages/WBSList'
 import WBSTreeView from './pages/WBSTreeView'
+import DependencyManagement from './pages/DependencyManagement'
 import PendingList from './pages/PendingList'
 import IssueList from './pages/IssueList'
 import GanttView from './pages/GanttView'
@@ -31,6 +32,9 @@ function App() {
                 <Link to="/wbs/tree" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   WBS 樹狀圖
                 </Link>
+                <Link to="/dependencies" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  依賴關係
+                </Link>
                 <Link to="/pending" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   待辦清單
                 </Link>
@@ -50,6 +54,7 @@ function App() {
             <Route path="/projects" element={<ProjectList />} />
             <Route path="/wbs" element={<WBSList />} />
             <Route path="/wbs/tree" element={<WBSTreeView />} />
+            <Route path="/dependencies" element={<DependencyManagement />} />
             <Route path="/pending" element={<PendingList />} />
             <Route path="/issues" element={<IssueList />} />
             <Route path="/gantt" element={<GanttView />} />
