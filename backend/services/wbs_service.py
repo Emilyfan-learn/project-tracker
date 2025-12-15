@@ -94,6 +94,16 @@ class WBSService:
 
         item_id = self._generate_item_id(wbs_data.project_id, wbs_data.wbs_id)
 
+        # Convert parent_id from wbs_id format to item_id format if provided
+        parent_item_id = None
+        if wbs_data.parent_id:
+            # If parent_id looks like a wbs_id (doesn't contain '_'), convert it
+            if '_' not in wbs_data.parent_id:
+                parent_item_id = self._generate_item_id(wbs_data.project_id, wbs_data.parent_id)
+            else:
+                # Already in item_id format
+                parent_item_id = wbs_data.parent_id
+
         # Parse owner_unit to determine owner_type and primary/secondary owners
         owner_type = None
         primary_owner = None
@@ -123,7 +133,7 @@ class WBSService:
                 source, source_date
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            item_id, wbs_data.project_id, wbs_data.wbs_id, wbs_data.parent_id,
+            item_id, wbs_data.project_id, wbs_data.wbs_id, parent_item_id,
             wbs_data.task_name, 'WBS', wbs_data.category,
             wbs_data.owner_unit, owner_type, primary_owner, secondary_owner,
             wbs_data.original_planned_start, wbs_data.original_planned_end,
@@ -225,6 +235,18 @@ class WBSService:
         params = []
 
         update_data = wbs_update.model_dump(exclude_unset=True)
+
+        # Convert parent_id from wbs_id format to item_id format if provided
+        if 'parent_id' in update_data and update_data['parent_id']:
+            # Get the project_id for this item
+            cursor.execute("SELECT project_id FROM tracking_items WHERE item_id = ?", (item_id,))
+            row = cursor.fetchone()
+            if row:
+                project_id = row[0]
+                # If parent_id looks like a wbs_id (doesn't contain '_'), convert it
+                if '_' not in update_data['parent_id']:
+                    update_data['parent_id'] = self._generate_item_id(project_id, update_data['parent_id'])
+                # else: Already in item_id format, use as-is
 
         # Parse owner_unit if provided
         if 'owner_unit' in update_data and update_data['owner_unit']:

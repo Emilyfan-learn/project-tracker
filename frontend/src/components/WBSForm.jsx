@@ -7,6 +7,7 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
   const [formData, setFormData] = useState({
     project_id: projectId || '',
     wbs_id: '',
+    parent_id: '',
     task_name: '',
     category: 'Task',
     owner_unit: '',
@@ -165,6 +166,25 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
           {errors.wbs_id && (
             <p className="text-red-500 text-sm mt-1">{errors.wbs_id}</p>
           )}
+        </div>
+
+        {/* Parent WBS ID */}
+        <div>
+          <label htmlFor="parent_id" className="label">
+            父項目 WBS ID (選填)
+          </label>
+          <input
+            type="text"
+            id="parent_id"
+            name="parent_id"
+            value={formData.parent_id}
+            onChange={handleChange}
+            placeholder="例如: 2, 2.1 (留空表示頂層項目)"
+            className="input-field"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            輸入父項目的 WBS 編號以建立階層關係
+          </p>
         </div>
 
         {/* Task Name */}
