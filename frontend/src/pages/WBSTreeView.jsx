@@ -90,11 +90,12 @@ const WBSTreeView = () => {
       })
     }
     collectNodeIds(treeData)
-    setExpandedNodes(allNodeIds)
+    setExpandedNodes(new Set(allNodeIds))
   }
 
   const collapseAll = () => {
-    setExpandedNodes(new Set())
+    // Force a complete state update by creating a new empty Set
+    setExpandedNodes(() => new Set())
   }
 
   const getStatusColor = (status) => {
