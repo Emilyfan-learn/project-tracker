@@ -146,3 +146,90 @@ async def download_wbs_template():
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/export/pending/{project_id}")
+async def export_pending_to_excel(project_id: str):
+    """
+    Export Pending items to Excel file
+
+    Creates a styled Excel file with:
+    - Chinese column headers
+    - Green colored header row
+    - Auto-adjusted column widths
+    - All pending items data for the specified project
+
+    Returns downloadable Excel file
+    """
+    try:
+        # Create temporary file for export
+        tmp_dir = tempfile.mkdtemp()
+        output_path = os.path.join(tmp_dir, f"待辦事項_{project_id}.xlsx")
+
+        # Export to Excel
+        result = excel_service.export_pending_to_excel(project_id, output_path)
+
+        if not result['success']:
+            raise HTTPException(status_code=400, detail=result.get('error', 'Export failed'))
+
+        if not os.path.exists(output_path):
+            raise HTTPException(status_code=500, detail="Export file was not created")
+
+        # Return file for download
+        return FileResponse(
+            path=output_path,
+            filename=f"待辦事項_{project_id}.xlsx",
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f"attachment; filename=待辦事項_{project_id}.xlsx"
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/export/issues/{project_id}")
+async def export_issues_to_excel(project_id: str):
+    """
+    Export Issues to Excel file
+
+    Creates a styled Excel file with:
+    - Chinese column headers
+    - Red colored header row
+    - Auto-adjusted column widths
+    - Orange highlighting for escalated items
+    - All issue tracking data for the specified project
+
+    Returns downloadable Excel file
+    """
+    try:
+        # Create temporary file for export
+        tmp_dir = tempfile.mkdtemp()
+        output_path = os.path.join(tmp_dir, f"問題追蹤_{project_id}.xlsx")
+
+        # Export to Excel
+        result = excel_service.export_issues_to_excel(project_id, output_path)
+
+        if not result['success']:
+            raise HTTPException(status_code=400, detail=result.get('error', 'Export failed'))
+
+        if not os.path.exists(output_path):
+            raise HTTPException(status_code=500, detail="Export file was not created")
+
+        # Return file for download
+        return FileResponse(
+            path=output_path,
+            filename=f"問題追蹤_{project_id}.xlsx",
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f"attachment; filename=問題追蹤_{project_id}.xlsx"
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

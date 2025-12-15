@@ -103,11 +103,85 @@ export const useExcel = () => {
     }
   }, [])
 
+  const exportPendingToExcel = useCallback(async (projectId) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/excel/export/pending/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'Export failed')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `待辦事項_${projectId}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      return { success: true }
+    } catch (err) {
+      setError(err.message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const exportIssuesToExcel = useCallback(async (projectId) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/excel/export/issues/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'Export failed')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `問題追蹤_${projectId}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      return { success: true }
+    } catch (err) {
+      setError(err.message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   return {
     loading,
     error,
     importWBSFromExcel,
     exportWBSToExcel,
     downloadWBSTemplate,
+    exportPendingToExcel,
+    exportIssuesToExcel,
   }
 }
