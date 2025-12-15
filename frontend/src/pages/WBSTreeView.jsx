@@ -189,8 +189,23 @@ const WBSTreeView = () => {
           </div>
 
           {/* Dates */}
-          <div className="w-48 flex-shrink-0 text-xs text-gray-500">
-            {node.revised_planned_start || node.original_planned_start} ~ {node.revised_planned_end || node.original_planned_end}
+          <div className="w-64 flex-shrink-0 text-xs">
+            {node.revised_planned_start || node.revised_planned_end ? (
+              // Has revised schedule
+              <div className="space-y-1">
+                <div className="text-gray-400 line-through">
+                  原: {node.original_planned_start} ~ {node.original_planned_end}
+                </div>
+                <div className="text-blue-600 font-semibold">
+                  調: {node.revised_planned_start || node.original_planned_start} ~ {node.revised_planned_end || node.original_planned_end}
+                </div>
+              </div>
+            ) : (
+              // Only original schedule
+              <div className="text-gray-600">
+                {node.original_planned_start} ~ {node.original_planned_end}
+              </div>
+            )}
           </div>
         </div>
 
@@ -283,7 +298,7 @@ const WBSTreeView = () => {
             <div className="w-32 flex-shrink-0">負責單位</div>
             <div className="w-24 flex-shrink-0 text-center">狀態</div>
             <div className="w-32 flex-shrink-0 text-center">進度</div>
-            <div className="w-48 flex-shrink-0">計畫期間</div>
+            <div className="w-64 flex-shrink-0">計畫期間 (原始/調整)</div>
           </div>
 
           {/* Tree Nodes */}
