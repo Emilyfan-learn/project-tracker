@@ -27,9 +27,8 @@ const PendingList = () => {
     internalOnly: false,
     overdueOnly: false,
     dueThisWeek: false,
-    highPriorityOnly: false,
     notReplied: false,
-    dateRange: '', // 新增日期區間選項
+    dateRange: '', // 日期區間選項
   })
 
   const {
@@ -202,11 +201,6 @@ const PendingList = () => {
         const dueDate = new Date(item.expected_reply_date)
         return dueDate >= today && dueDate <= weekFromNow
       })
-    }
-
-    // Filter: High priority only
-    if (smartFilters.highPriorityOnly) {
-      filtered = filtered.filter((item) => item.priority === 'High')
     }
 
     // Filter: Not replied
@@ -461,19 +455,6 @@ const PendingList = () => {
               <span className="text-gray-700">只看本週到期</span>
             </label>
 
-            {/* High Priority Only Filter */}
-            <label className="flex items-center text-sm">
-              <input
-                type="checkbox"
-                checked={smartFilters.highPriorityOnly}
-                onChange={(e) =>
-                  setSmartFilters({ ...smartFilters, highPriorityOnly: e.target.checked })
-                }
-                className="mr-2 rounded"
-              />
-              <span className="text-gray-700">只看高優先級</span>
-            </label>
-
             {/* Not Replied Filter */}
             <label className="flex items-center text-sm">
               <input
@@ -520,7 +501,6 @@ const PendingList = () => {
                     internalOnly: false,
                     overdueOnly: false,
                     dueThisWeek: false,
-                    highPriorityOnly: false,
                     notReplied: false,
                     dateRange: '',
                   })

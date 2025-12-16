@@ -24,8 +24,8 @@ const IssueList = () => {
     internalOnly: false,
     overdueOnly: false,
     escalatedOnly: false,
-    highSeverityOnly: false,
-    highPriorityOnly: false,
+    reportedDateRange: '', // 回報日期區間
+    targetDateRange: '', // 目標解決日期區間
   })
   const [myUsername, setMyUsername] = useState('') // For "my responsibility" filter
 
@@ -240,18 +240,86 @@ const IssueList = () => {
       filtered = filtered.filter((item) => item.is_escalated === true)
     }
 
-    // Filter: High severity only (Critical or High)
-    if (smartFilters.highSeverityOnly) {
-      filtered = filtered.filter(
-        (item) => item.severity === 'Critical' || item.severity === 'High'
-      )
+    // Filter: Reported date range
+    if (smartFilters.reportedDateRange) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      filtered = filtered.filter((item) => {
+        if (!item.reported_date) return false
+        const reportedDate = new Date(item.reported_date)
+        reportedDate.setHours(0, 0, 0, 0)
+
+        switch (smartFilters.reportedDateRange) {
+          case 'today':
+            return reportedDate.getTime() === today.getTime()
+          case 'yesterday':
+            const yesterday = new Date(today)
+            yesterday.setDate(yesterday.getDate() - 1)
+            return reportedDate.getTime() === yesterday.getTime()
+          case 'last7days':
+            const last7days = new Date(today)
+            last7days.setDate(last7days.getDate() - 7)
+            return reportedDate >= last7days && reportedDate <= today
+          case 'last30days':
+            const last30days = new Date(today)
+            last30days.setDate(last30days.getDate() - 30)
+            return reportedDate >= last30days && reportedDate <= today
+          case 'thisMonth':
+            return reportedDate.getMonth() === today.getMonth() && reportedDate.getFullYear() === today.getFullYear()
+          case 'lastMonth':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0)
+            return reportedDate >= lastMonth && reportedDate <= lastMonthEnd
+          default:
+            return true
+        }
+      })
     }
 
-    // Filter: High priority only (Urgent or High)
-    if (smartFilters.highPriorityOnly) {
-      filtered = filtered.filter(
-        (item) => item.priority === 'Urgent' || item.priority === 'High'
-      )
+    // Filter: Target resolution date range
+    if (smartFilters.targetDateRange) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      filtered = filtered.filter((item) => {
+        if (!item.target_resolution_date) return false
+        const targetDate = new Date(item.target_resolution_date)
+        targetDate.setHours(0, 0, 0, 0)
+
+        switch (smartFilters.targetDateRange) {
+          case 'today':
+            return targetDate.getTime() === today.getTime()
+          case 'yesterday':
+            const yesterday = new Date(today)
+            yesterday.setDate(yesterday.getDate() - 1)
+            return targetDate.getTime() === yesterday.getTime()
+          case 'last7days':
+            const last7days = new Date(today)
+            last7days.setDate(last7days.getDate() - 7)
+            return targetDate >= last7days && targetDate <= today
+          case 'last30days':
+            const last30days = new Date(today)
+            last30days.setDate(last30days.getDate() - 30)
+            return targetDate >= last30days && targetDate <= today
+          case 'thisMonth':
+            return targetDate.getMonth() === today.getMonth() && targetDate.getFullYear() === today.getFullYear()
+          case 'lastMonth':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0)
+            return targetDate >= lastMonth && targetDate <= lastMonthEnd
+          case 'next7days':
+            const next7days = new Date(today)
+            next7days.setDate(next7days.getDate() + 7)
+            return targetDate >= today && targetDate <= next7days
+          case 'next30days':
+            const next30days = new Date(today)
+            next30days.setDate(next30days.getDate() + 30)
+            return targetDate >= today && targetDate <= next30days
+          default:
+            return true
+        }
+      })
     }
 
     return filtered
@@ -482,31 +550,53 @@ const IssueList = () => {
               </span>
             </label>
 
-            {/* High Severity Only Filter */}
-            <label className="flex items-center text-sm">
-              <input
-                type="checkbox"
-                checked={smartFilters.highSeverityOnly}
+            {/* Reported Date Range Filter */}
+            <div className="md:col-span-2 lg:col-span-1">
+              <label htmlFor="reported-date-range-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                回報日期區間
+              </label>
+              <select
+                id="reported-date-range-filter"
+                value={smartFilters.reportedDateRange}
                 onChange={(e) =>
-                  setSmartFilters({ ...smartFilters, highSeverityOnly: e.target.checked })
+                  setSmartFilters({ ...smartFilters, reportedDateRange: e.target.value })
                 }
-                className="mr-2 rounded"
-              />
-              <span className="text-gray-700">只看高嚴重性</span>
-            </label>
+                className="input-field text-sm w-full"
+              >
+                <option value="">全部日期</option>
+                <option value="today">今天</option>
+                <option value="yesterday">昨天</option>
+                <option value="last7days">最近 7 天</option>
+                <option value="last30days">最近 30 天</option>
+                <option value="thisMonth">本月</option>
+                <option value="lastMonth">上個月</option>
+              </select>
+            </div>
 
-            {/* High Priority Only Filter */}
-            <label className="flex items-center text-sm">
-              <input
-                type="checkbox"
-                checked={smartFilters.highPriorityOnly}
+            {/* Target Resolution Date Range Filter */}
+            <div className="md:col-span-2 lg:col-span-1">
+              <label htmlFor="target-date-range-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                目標解決日期區間
+              </label>
+              <select
+                id="target-date-range-filter"
+                value={smartFilters.targetDateRange}
                 onChange={(e) =>
-                  setSmartFilters({ ...smartFilters, highPriorityOnly: e.target.checked })
+                  setSmartFilters({ ...smartFilters, targetDateRange: e.target.value })
                 }
-                className="mr-2 rounded"
-              />
-              <span className="text-gray-700">只看高優先級</span>
-            </label>
+                className="input-field text-sm w-full"
+              >
+                <option value="">全部日期</option>
+                <option value="today">今天</option>
+                <option value="yesterday">昨天</option>
+                <option value="last7days">過去 7 天</option>
+                <option value="last30days">過去 30 天</option>
+                <option value="next7days">未來 7 天</option>
+                <option value="next30days">未來 30 天</option>
+                <option value="thisMonth">本月</option>
+                <option value="lastMonth">上個月</option>
+              </select>
+            </div>
 
             {/* Clear All Filters Button */}
             {Object.values(smartFilters).some((v) => v) && (
@@ -518,8 +608,8 @@ const IssueList = () => {
                     internalOnly: false,
                     overdueOnly: false,
                     escalatedOnly: false,
-                    highSeverityOnly: false,
-                    highPriorityOnly: false,
+                    reportedDateRange: '',
+                    targetDateRange: '',
                   })
                 }
                 className="text-sm text-primary-600 hover:text-primary-800 underline"
