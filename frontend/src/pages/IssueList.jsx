@@ -563,10 +563,13 @@ const IssueList = () => {
                     類型
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    嚴重性
+                    優先級
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    優先級
+                    回報日期
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    目標解決日期
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     指派給
@@ -582,7 +585,7 @@ const IssueList = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredIssuesList.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="9" className="px-6 py-4 text-center text-gray-500">
                       {issuesList.length === 0 ? '暫無資料' : '無符合篩選條件的資料'}
                     </td>
                   </tr>
@@ -614,21 +617,18 @@ const IssueList = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getSeverityBadgeColor(
-                            item.severity
-                          )}`}
-                        >
-                          {item.severity}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityBadgeColor(
                             item.priority
                           )}`}
                         >
                           {item.priority}
                         </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {item.reported_date || '-'}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {item.target_resolution_date || '-'}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.assigned_to || '-'}

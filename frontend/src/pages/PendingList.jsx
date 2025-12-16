@@ -29,6 +29,7 @@ const PendingList = () => {
     dueThisWeek: false,
     highPriorityOnly: false,
     notReplied: false,
+    dateRange: '', // 新增日期區間選項
   })
 
   const {
@@ -211,6 +212,43 @@ const PendingList = () => {
     // Filter: Not replied
     if (smartFilters.notReplied) {
       filtered = filtered.filter((item) => !item.is_replied)
+    }
+
+    // Filter: Date range
+    if (smartFilters.dateRange) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      filtered = filtered.filter((item) => {
+        if (!item.task_date) return false
+        const taskDate = new Date(item.task_date)
+        taskDate.setHours(0, 0, 0, 0)
+
+        switch (smartFilters.dateRange) {
+          case 'today':
+            return taskDate.getTime() === today.getTime()
+          case 'yesterday':
+            const yesterday = new Date(today)
+            yesterday.setDate(yesterday.getDate() - 1)
+            return taskDate.getTime() === yesterday.getTime()
+          case 'last7days':
+            const last7days = new Date(today)
+            last7days.setDate(last7days.getDate() - 7)
+            return taskDate >= last7days && taskDate <= today
+          case 'last30days':
+            const last30days = new Date(today)
+            last30days.setDate(last30days.getDate() - 30)
+            return taskDate >= last30days && taskDate <= today
+          case 'thisMonth':
+            return taskDate.getMonth() === today.getMonth() && taskDate.getFullYear() === today.getFullYear()
+          case 'lastMonth':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0)
+            return taskDate >= lastMonth && taskDate <= lastMonthEnd
+          default:
+            return true
+        }
+      })
     }
 
     return filtered
@@ -449,6 +487,29 @@ const PendingList = () => {
               <span className="text-gray-700">只看未回覆</span>
             </label>
 
+            {/* Date Range Filter */}
+            <div className="md:col-span-2 lg:col-span-1">
+              <label htmlFor="date-range-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                任務日期區間
+              </label>
+              <select
+                id="date-range-filter"
+                value={smartFilters.dateRange}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, dateRange: e.target.value })
+                }
+                className="input-field text-sm w-full"
+              >
+                <option value="">全部日期</option>
+                <option value="today">今天</option>
+                <option value="yesterday">昨天</option>
+                <option value="last7days">最近 7 天</option>
+                <option value="last30days">最近 30 天</option>
+                <option value="thisMonth">本月</option>
+                <option value="lastMonth">上個月</option>
+              </select>
+            </div>
+
             {/* Clear All Filters Button */}
             {Object.values(smartFilters).some((v) => v) && (
               <button
@@ -461,6 +522,7 @@ const PendingList = () => {
                     dueThisWeek: false,
                     highPriorityOnly: false,
                     notReplied: false,
+                    dateRange: '',
                   })
                 }
                 className="text-sm text-primary-600 hover:text-primary-800 underline"
