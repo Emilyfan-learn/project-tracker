@@ -2,7 +2,13 @@
 Database initialization script with schema definitions
 """
 import sqlite3
+import sys
 from pathlib import Path
+
+# Add project root to path to support running from anywhere
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from backend.config import settings
 
 
