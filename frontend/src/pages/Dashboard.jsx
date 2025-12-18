@@ -14,6 +14,7 @@ const Dashboard = () => {
     dependencies: { total: 0, active: 0 },
   })
   const [overdueItems, setOverdueItems] = useState([])
+  const [dueTodayItems, setDueTodayItems] = useState([])
   const [dueSoonItems, setDueSoonItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -145,8 +146,60 @@ const Dashboard = () => {
       ]
       setOverdueItems(overdue.slice(0, 5))
 
-      // Collect items due in 7 days
+      // Collect items due today
       const now = new Date()
+      const today = new Date(now)
+      today.setHours(0, 0, 0, 0)
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+
+      const dueToday = [
+        ...wbsItems
+          .filter((w) => {
+            if (w.status === '已完成') return false
+            const dueDate = new Date(w.revised_planned_end || w.original_planned_end)
+            dueDate.setHours(0, 0, 0, 0)
+            return dueDate.getTime() === today.getTime()
+          })
+          .map((w) => ({
+            type: 'WBS',
+            id: w.wbs_id,
+            name: w.task_name,
+            dueDate: w.revised_planned_end || w.original_planned_end,
+            status: w.status,
+          })),
+        ...pendingItems
+          .filter((p) => {
+            if (!p.expected_reply_date || p.status === '已完成') return false
+            const dueDate = new Date(p.expected_reply_date)
+            dueDate.setHours(0, 0, 0, 0)
+            return dueDate.getTime() === today.getTime()
+          })
+          .map((p) => ({
+            type: 'Pending',
+            id: p.pending_id,
+            name: p.description,
+            dueDate: p.expected_reply_date,
+            status: p.status,
+          })),
+        ...issueItems
+          .filter((i) => {
+            if (!i.target_resolution_date || i.status === 'Resolved' || i.status === 'Closed') return false
+            const dueDate = new Date(i.target_resolution_date)
+            dueDate.setHours(0, 0, 0, 0)
+            return dueDate.getTime() === today.getTime()
+          })
+          .map((i) => ({
+            type: 'Issue',
+            id: i.issue_id,
+            name: i.issue_title,
+            dueDate: i.target_resolution_date,
+            status: i.status,
+          })),
+      ]
+      setDueTodayItems(dueToday.slice(0, 5))
+
+      // Collect items due in 7 days
       const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
       const dueSoon = [
         ...wbsItems
@@ -260,6 +313,32 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Today's Due Items - Highest Priority */}
+        {dueTodayItems.length > 0 && (
+          <div className="mb-6 bg-blue-50 border-l-4 border-blue-600 p-4 rounded shadow-md">
+            <div className="flex items-center mb-3">
+              <span className="text-blue-700 font-bold text-xl">🎯 今日到期項目 ({dueTodayItems.length})</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {dueTodayItems.map((item, idx) => (
+                <div key={idx} className="bg-white p-3 rounded border border-blue-200 hover:border-blue-400 transition-colors">
+                  <div className="text-sm text-blue-900 flex justify-between items-center">
+                    <span>
+                      <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold mr-2">
+                        {item.type}
+                      </span>
+                      <span className="font-medium">{item.name}</span>
+                    </span>
+                    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Alert Sections */}
         {(overdueItems.length > 0 || stats.issues.critical > 0) && (
