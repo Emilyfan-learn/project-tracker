@@ -321,21 +321,28 @@ const Dashboard = () => {
               <span className="text-blue-700 font-bold text-xl">🎯 今日到期項目 ({dueTodayItems.length})</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {dueTodayItems.map((item, idx) => (
-                <div key={idx} className="bg-white p-3 rounded border border-blue-200 hover:border-blue-400 transition-colors">
-                  <div className="text-sm text-blue-900 flex justify-between items-center">
-                    <span>
-                      <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold mr-2">
-                        {item.type}
+              {dueTodayItems.map((item, idx) => {
+                const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                return (
+                  <Link
+                    key={idx}
+                    to={linkTo}
+                    className="bg-white p-3 rounded border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer"
+                  >
+                    <div className="text-sm text-blue-900 flex justify-between items-center">
+                      <span className="flex-1">
+                        <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold mr-2">
+                          {item.type}
+                        </span>
+                        <span className="font-medium hover:text-blue-700">{item.name}</span>
                       </span>
-                      <span className="font-medium">{item.name}</span>
-                    </span>
-                    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                      {item.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded ml-2">
+                        {item.status}
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         )}
@@ -350,14 +357,21 @@ const Dashboard = () => {
                   <span className="text-red-600 font-semibold text-lg">⚠️ 逾期項目 ({overdueItems.length})</span>
                 </div>
                 <div className="space-y-2">
-                  {overdueItems.map((item, idx) => (
-                    <div key={idx} className="text-sm text-red-800 flex justify-between">
-                      <span>
-                        <span className="font-semibold">[{item.type}]</span> {item.name}
-                      </span>
-                      <span className="text-red-600">{item.dueDate}</span>
-                    </div>
-                  ))}
+                  {overdueItems.map((item, idx) => {
+                    const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                    return (
+                      <Link
+                        key={idx}
+                        to={linkTo}
+                        className="flex justify-between items-center text-sm text-red-800 hover:text-red-900 hover:bg-red-100 p-2 rounded transition-colors"
+                      >
+                        <span>
+                          <span className="font-semibold">[{item.type}]</span> {item.name}
+                        </span>
+                        <span className="text-red-600 text-xs">{item.dueDate}</span>
+                      </Link>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -386,14 +400,21 @@ const Dashboard = () => {
               <span className="text-yellow-700 font-semibold text-lg">📅 本週即將到期 ({dueSoonItems.length})</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {dueSoonItems.map((item, idx) => (
-                <div key={idx} className="text-sm text-yellow-800 flex justify-between">
-                  <span>
-                    <span className="font-semibold">[{item.type}]</span> {item.name}
-                  </span>
-                  <span className="text-yellow-600">{item.daysUntilDue} 天後</span>
-                </div>
-              ))}
+              {dueSoonItems.map((item, idx) => {
+                const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                return (
+                  <Link
+                    key={idx}
+                    to={linkTo}
+                    className="flex justify-between items-center text-sm text-yellow-800 hover:text-yellow-900 hover:bg-yellow-100 p-2 rounded transition-colors"
+                  >
+                    <span>
+                      <span className="font-semibold">[{item.type}]</span> {item.name}
+                    </span>
+                    <span className="text-yellow-600 text-xs">{item.daysUntilDue} 天後</span>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         )}
