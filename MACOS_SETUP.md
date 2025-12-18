@@ -82,11 +82,11 @@ brew install --cask docker
 #### 1. 建立並啟動容器
 
 ```bash
-# 一鍵啟動
-docker-compose up -d
+# 一鍵啟動（Docker Desktop 使用 docker compose 不是 docker-compose）
+docker compose up -d
 
 # 查看日誌
-docker-compose logs -f
+docker compose logs -f
 ```
 
 #### 2. 開啟瀏覽器
@@ -96,8 +96,10 @@ docker-compose logs -f
 #### 3. 停止服務
 
 ```bash
-docker-compose down
+docker compose down
 ```
+
+**注意：** 如果您使用的是舊版 Docker，命令可能是 `docker-compose`（有連字符）
 
 ---
 
