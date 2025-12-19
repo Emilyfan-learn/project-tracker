@@ -204,6 +204,51 @@ const WBSList = () => {
     return 'text-gray-600'
   }
 
+  // Build hierarchy structure with indentation levels
+  const buildHierarchy = (items) => {
+    // Create a map for quick lookup
+    const itemMap = new Map()
+    items.forEach(item => {
+      itemMap.set(item.wbs_id, { ...item, level: 0, children: [] })
+    })
+
+    // Calculate hierarchy levels
+    const calculateLevel = (wbsId, visited = new Set()) => {
+      if (visited.has(wbsId)) return 0 // Prevent circular references
+      visited.add(wbsId)
+
+      const item = itemMap.get(wbsId)
+      if (!item || !item.parent_id) return 0
+
+      const parent = itemMap.get(item.parent_id)
+      if (!parent) return 0
+
+      return calculateLevel(item.parent_id, visited) + 1
+    }
+
+    // Set levels for all items
+    items.forEach(item => {
+      const itemWithLevel = itemMap.get(item.wbs_id)
+      if (itemWithLevel) {
+        itemWithLevel.level = calculateLevel(item.wbs_id)
+      }
+    })
+
+    // Sort by WBS ID to maintain logical order
+    return Array.from(itemMap.values()).sort((a, b) => {
+      // Simple string comparison for WBS IDs like "1", "1.1", "1.2", "2", etc.
+      const aParts = a.wbs_id.split('.').map(Number)
+      const bParts = b.wbs_id.split('.').map(Number)
+
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const aNum = aParts[i] || 0
+        const bNum = bParts[i] || 0
+        if (aNum !== bNum) return aNum - bNum
+      }
+      return 0
+    })
+  }
+
   // Apply smart filters to WBS list
   const getFilteredWBSList = () => {
     let filtered = [...wbsList]
@@ -248,7 +293,7 @@ const WBSList = () => {
       })
     }
 
-    return filtered
+    return buildHierarchy(filtered)
   }
 
   const filteredWBSList = getFilteredWBSList()
@@ -555,7 +600,15 @@ const WBSList = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div className="flex items-center gap-2">
-                          <span>{item.task_name}</span>
+                          {/* Hierarchical indentation */}
+                          {item.level > 0 && (
+                            <span style={{ marginLeft: `${item.level * 20}px` }} className="text-gray-400">
+                              {'└─ '.repeat(1)}
+                            </span>
+                          )}
+                          <span className={item.level > 0 ? 'font-normal' : 'font-semibold'}>
+                            {item.task_name}
+                          </span>
                           {item.is_overdue && (
                             <span className="text-red-500">⚠️</span>
                           )}
