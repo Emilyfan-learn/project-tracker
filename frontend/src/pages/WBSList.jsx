@@ -29,6 +29,7 @@ const WBSList = () => {
   const [successMessage, setSuccessMessage] = useState('')
   const [continueAdding, setContinueAdding] = useState(false) // 用於連續新增
   const [expandedItems, setExpandedItems] = useState(new Set()) // 追蹤展開的項目
+  const [initialExpand, setInitialExpand] = useState(false) // 追蹤是否已初始展開
   const fileInputRef = useRef(null)
 
   const {
@@ -87,6 +88,26 @@ const WBSList = () => {
       return () => clearTimeout(timer)
     }
   }, [successMessage])
+
+  // Auto-expand all items on initial load
+  useEffect(() => {
+    if (wbsList.length > 0 && !initialExpand) {
+      // Collect all WBS IDs that have children
+      const allWbsIds = new Set()
+      const tree = buildHierarchyTree(wbsList)
+      const collectIds = (items) => {
+        items.forEach(item => {
+          if (item.children && item.children.length > 0) {
+            allWbsIds.add(item.wbs_id)
+            collectIds(item.children)
+          }
+        })
+      }
+      collectIds(tree)
+      setExpandedItems(allWbsIds)
+      setInitialExpand(true)
+    }
+  }, [wbsList, initialExpand])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -307,6 +328,16 @@ const WBSList = () => {
     })
 
     topLevel.forEach(node => sortChildren(node))
+
+    // Debug: Log tree structure
+    if (topLevel.length > 0) {
+      console.log('WBS Tree Structure:', topLevel.map(node => ({
+        wbs_id: node.wbs_id,
+        task_name: node.task_name,
+        children_count: node.children?.length || 0,
+        children: node.children?.map(child => child.wbs_id)
+      })))
+    }
 
     return topLevel
   }
