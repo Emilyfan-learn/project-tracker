@@ -55,8 +55,16 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
   useEffect(() => {
     if (initialData) {
+      // Convert parent_id from item_id format (PRJ001_1) to wbs_id format (1)
+      let parentWbsId = initialData.parent_id || ''
+      if (parentWbsId && parentWbsId.includes('_')) {
+        // Extract wbs_id from item_id format
+        parentWbsId = parentWbsId.split('_')[1]
+      }
+
       setFormData({
         ...initialData,
+        parent_id: parentWbsId,
         // Convert date objects to string format for input fields
         original_planned_start: initialData.original_planned_start || '',
         original_planned_end: initialData.original_planned_end || '',
