@@ -242,36 +242,14 @@ const WBSList = () => {
       }
     })
 
-    // Sort by parent first, then by WBS ID
+    // Sort by WBS ID hierarchically (natural order)
+    // This will automatically group parent and children together
+    // Example: 1, 1.1, 1.1.1, 1.2, 1.3, 2, 2.1, 3
     return Array.from(itemMap.values()).sort((a, b) => {
-      // Extract parent WBS ID from item_id format
-      const getParentWbsId = (item) => {
-        if (!item.parent_id) return ''
-        return item.parent_id.includes('_') ? item.parent_id.split('_')[1] : item.parent_id
-      }
-
-      const aParent = getParentWbsId(a) || ''
-      const bParent = getParentWbsId(b) || ''
-
-      // First sort by parent
-      if (aParent !== bParent) {
-        if (!aParent) return -1 // Items without parent come first
-        if (!bParent) return 1
-
-        const aParentParts = aParent.split('.').map(Number)
-        const bParentParts = bParent.split('.').map(Number)
-
-        for (let i = 0; i < Math.max(aParentParts.length, bParentParts.length); i++) {
-          const aNum = aParentParts[i] || 0
-          const bNum = bParentParts[i] || 0
-          if (aNum !== bNum) return aNum - bNum
-        }
-      }
-
-      // Then sort by WBS ID
       const aParts = a.wbs_id.split('.').map(Number)
       const bParts = b.wbs_id.split('.').map(Number)
 
+      // Compare each level of the WBS ID
       for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
         const aNum = aParts[i] || 0
         const bNum = bParts[i] || 0
