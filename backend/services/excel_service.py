@@ -56,6 +56,7 @@ class ExcelService:
 
         Expected columns (Chinese):
         - 項目 (WBS ID)
+        - 父項目 (Parent WBS ID)
         - 任務說明 (Task Name)
         - 單位 (Owner Unit)
         - 類別 (Category)
@@ -77,6 +78,7 @@ class ExcelService:
             # Column mapping (Chinese to English)
             column_map = {
                 '項目': 'wbs_id',
+                '父項目': 'parent_id',
                 '任務說明': 'task_name',
                 '單位': 'owner_unit',
                 '類別': 'category',
@@ -120,6 +122,7 @@ class ExcelService:
                     wbs_data = {
                         'project_id': project_id,
                         'wbs_id': str(row['wbs_id']).strip(),
+                        'parent_id': str(row.get('parent_id', '')).strip() if pd.notna(row.get('parent_id')) and str(row.get('parent_id', '')).strip() else None,
                         'task_name': str(row.get('task_name', '')).strip(),
                         'category': str(row.get('category', 'Task')).strip() or 'Task',
                         'owner_unit': str(row.get('owner_unit', '')).strip() if pd.notna(row.get('owner_unit')) else None,
@@ -182,6 +185,7 @@ class ExcelService:
             query = """
                 SELECT
                     wbs_id,
+                    parent_id,
                     task_name,
                     owner_unit,
                     category,
@@ -216,6 +220,7 @@ class ExcelService:
             # Rename columns to Chinese
             df = df.rename(columns={
                 'wbs_id': '項目',
+                'parent_id': '父項目',
                 'task_name': '任務說明',
                 'owner_unit': '單位',
                 'category': '類別',
@@ -310,6 +315,7 @@ class ExcelService:
             # Define template columns
             columns = [
                 '項目',
+                '父項目',
                 '任務說明',
                 '單位',
                 '類別',
@@ -327,10 +333,10 @@ class ExcelService:
 
             # Create sample data
             sample_data = [
-                ['1', '專案啟動', '專案經理', 'Milestone', '01/01/2024', '01/01/2024', '', '', '', '', '', 100, '已完成', ''],
-                ['1.1', '需求分析', '開發部', 'Task', '01/02/2024', '01/15/2024', '', '', '01/02/2024', '01/14/2024', 10, 100, '已完成', ''],
-                ['1.2', '系統設計', 'AAA/BBB', 'Task', '01/16/2024', '01/31/2024', '', '', '01/16/2024', '', 12, 60, '進行中', ''],
-                ['2', '開發階段', '開發部', 'Milestone', '02/01/2024', '03/31/2024', '', '', '', '', '', 0, '未開始', ''],
+                ['1', '', '專案啟動', '專案經理', 'Milestone', '01/01/2024', '01/01/2024', '', '', '', '', '', 100, '已完成', '頂層項目範例'],
+                ['1.1', '1', '需求分析', '開發部', 'Task', '01/02/2024', '01/15/2024', '', '', '01/02/2024', '01/14/2024', 10, 100, '已完成', '子項目範例'],
+                ['1.2', '1', '系統設計', 'AAA/BBB', 'Task', '01/16/2024', '01/31/2024', '', '', '01/16/2024', '', 12, 60, '進行中', '子項目範例'],
+                ['2', '', '開發階段', '開發部', 'Milestone', '02/01/2024', '03/31/2024', '', '', '', '', '', 0, '未開始', '頂層項目範例'],
             ]
 
             df = pd.DataFrame(sample_data, columns=columns)
