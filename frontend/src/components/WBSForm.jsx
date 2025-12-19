@@ -2,8 +2,10 @@
  * WBS Form Component for creating and editing WBS items
  */
 import React, { useState, useEffect } from 'react'
+import api from '../utils/api'
 
 const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
+  const [availableParents, setAvailableParents] = useState([])
   const [formData, setFormData] = useState({
     project_id: projectId || '',
     wbs_id: '',
@@ -65,6 +67,30 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
       })
     }
   }, [initialData])
+
+  // Fetch available parent WBS items
+  useEffect(() => {
+    if (projectId) {
+      fetchAvailableParents()
+    }
+  }, [projectId])
+
+  const fetchAvailableParents = async () => {
+    try {
+      const response = await api.get('/wbs/', {
+        params: { project_id: projectId, limit: 1000 }
+      })
+      // Filter out current item to prevent self-reference
+      const items = response.items || []
+      const filteredItems = initialData
+        ? items.filter(item => item.item_id !== initialData.item_id)
+        : items
+      setAvailableParents(filteredItems)
+    } catch (err) {
+      console.error('Failed to fetch parent items:', err)
+      setAvailableParents([])
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -168,22 +194,27 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
           )}
         </div>
 
-        {/* Parent WBS ID */}
+        {/* Parent WBS ID - Dropdown Selection */}
         <div>
           <label htmlFor="parent_id" className="label">
-            父項目 WBS ID (選填)
+            父項目 (選填)
           </label>
-          <input
-            type="text"
+          <select
             id="parent_id"
             name="parent_id"
             value={formData.parent_id}
             onChange={handleChange}
-            placeholder="例如: 2, 2.1 (留空表示頂層項目)"
             className="input-field"
-          />
+          >
+            <option value="">-- 無 (頂層項目) --</option>
+            {availableParents.map((item) => (
+              <option key={item.item_id} value={item.wbs_id}>
+                {item.wbs_id} - {item.task_name}
+              </option>
+            ))}
+          </select>
           <p className="text-xs text-gray-500 mt-1">
-            輸入父項目的 WBS 編號以建立階層關係
+            選擇父項目以建立階層關係，留空表示頂層項目
           </p>
         </div>
 
