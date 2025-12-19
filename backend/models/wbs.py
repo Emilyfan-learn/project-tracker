@@ -48,6 +48,7 @@ class WBSCreate(WBSBase):
 
 class WBSUpdate(BaseModel):
     """Model for updating a WBS item"""
+    parent_id: Optional[str] = None
     task_name: Optional[str] = None
     category: Optional[str] = None
 
