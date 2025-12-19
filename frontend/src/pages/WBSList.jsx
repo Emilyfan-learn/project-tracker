@@ -596,16 +596,25 @@ const WBSList = () => {
                   filteredWBSList.map((item) => (
                     <tr key={item.item_id} className={item.is_overdue ? 'bg-red-50' : ''}>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {item.wbs_id}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="flex items-center gap-2">
-                          {/* Hierarchical indentation */}
+                        <div className="flex items-center gap-1">
+                          {/* Visual hierarchy indicator */}
                           {item.level > 0 && (
-                            <span style={{ marginLeft: `${item.level * 20}px` }} className="text-gray-400">
-                              {'└─ '.repeat(1)}
+                            <span className="text-gray-400 text-xs">
+                              {'  '.repeat(item.level)}└─
                             </span>
                           )}
+                          <span className={item.level > 0 ? 'text-blue-600' : 'text-gray-900 font-bold'}>
+                            {item.wbs_id}
+                          </span>
+                          {item.parent_id && (
+                            <span className="text-xs text-gray-400" title={`父項目: ${item.parent_id.split('_')[1] || item.parent_id}`}>
+                              ↑
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-900">
+                        <div className="flex items-center gap-2">
                           <span className={item.level > 0 ? 'font-normal' : 'font-semibold'}>
                             {item.task_name}
                           </span>
