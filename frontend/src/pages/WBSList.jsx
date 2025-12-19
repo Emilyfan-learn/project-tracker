@@ -741,9 +741,6 @@ const WBSList = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    父 WBS ID
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     WBS ID
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -778,23 +775,13 @@ const WBSList = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredWBSList.length === 0 ? (
                   <tr>
-                    <td colSpan="11" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="10" className="px-6 py-4 text-center text-gray-500">
                       {wbsList.length === 0 ? '暫無資料' : '無符合篩選條件的資料'}
                     </td>
                   </tr>
                 ) : (
                   filteredWBSList.map((item) => (
                     <tr key={item.item_id} className={item.is_overdue ? 'bg-red-50' : ''}>
-                      {/* 父 WBS ID 欄位 */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {item.parent_id ? (
-                          <span className="text-gray-500">
-                            {item.parent_id.includes('_') ? item.parent_id.split('_')[1] : item.parent_id}
-                          </span>
-                        ) : (
-                          <span className="text-gray-300">-</span>
-                        )}
-                      </td>
                       {/* WBS ID 欄位 */}
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <div className="flex items-center gap-1">
