@@ -89,3 +89,7 @@ htmlcov/
 
 # OS
 Thumbs.db
+
+# Process IDs
+.backend.pid
+.frontend.pid
