@@ -460,27 +460,21 @@ const WBSList = () => {
             >
               <option value="">全部</option>
               {(() => {
-                // Get unique parent WBS IDs
-                const parentIds = new Set()
-                wbsList.forEach(item => {
-                  if (item.parent_id) {
-                    const parentWbsId = item.parent_id.includes('_')
-                      ? item.parent_id.split('_')[1]
-                      : item.parent_id
-                    parentIds.add(parentWbsId)
-                  }
-                })
-                return Array.from(parentIds).sort((a, b) => {
-                  const aParts = a.split('.').map(Number)
-                  const bParts = b.split('.').map(Number)
+                // Only show top-level WBS items (those without parent_id)
+                const topLevelItems = wbsList.filter(item => !item.parent_id)
+                return topLevelItems.sort((a, b) => {
+                  const aParts = a.wbs_id.split('.').map(Number)
+                  const bParts = b.wbs_id.split('.').map(Number)
                   for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
                     const aNum = aParts[i] || 0
                     const bNum = bParts[i] || 0
                     if (aNum !== bNum) return aNum - bNum
                   }
                   return 0
-                }).map(id => (
-                  <option key={id} value={id}>{id}</option>
+                }).map(item => (
+                  <option key={item.item_id} value={item.wbs_id}>
+                    {item.wbs_id} - {item.task_name}
+                  </option>
                 ))
               })()}
             </select>
