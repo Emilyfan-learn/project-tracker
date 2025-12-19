@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import api from '../utils/api'
 
-const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
+const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableWBSList = [] }) => {
   const [availableParents, setAvailableParents] = useState([])
   const [formData, setFormData] = useState({
     project_id: projectId || '',
@@ -76,29 +76,26 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
     }
   }, [initialData])
 
-  // Fetch available parent WBS items
+  // Use available WBS list from parent component
   useEffect(() => {
-    if (projectId) {
-      fetchAvailableParents()
-    }
-  }, [projectId])
+    // Filter out current item to prevent self-reference
+    const filteredItems = initialData
+      ? availableWBSList.filter(item => item.item_id !== initialData.item_id)
+      : availableWBSList
+    setAvailableParents(filteredItems)
+  }, [availableWBSList, initialData])
 
-  const fetchAvailableParents = async () => {
-    try {
-      const response = await api.get('/wbs/', {
-        params: { project_id: projectId, limit: 1000 }
-      })
-      // Filter out current item to prevent self-reference
-      const items = response.items || []
-      const filteredItems = initialData
-        ? items.filter(item => item.item_id !== initialData.item_id)
-        : items
-      setAvailableParents(filteredItems)
-    } catch (err) {
-      console.error('Failed to fetch parent items:', err)
-      setAvailableParents([])
+  // Auto-update WBS ID when availableParents changes (for continuous adding)
+  useEffect(() => {
+    // Only auto-update if we're in add mode (not edit) and have a parent selected
+    if (!initialData && formData.parent_id && availableParents.length > 0) {
+      const nextWbsId = calculateNextChildWbsId(formData.parent_id)
+      // Only update if the calculated ID is different from current
+      if (nextWbsId !== formData.wbs_id) {
+        setFormData(prev => ({ ...prev, wbs_id: nextWbsId }))
+      }
     }
-  }
+  }, [availableParents, formData.parent_id])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -220,12 +217,7 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
         status: '未開始',
         notes: '',
       })
-
-      // Auto-calculate next WBS ID
-      if (formData.parent_id) {
-        const nextWbsId = calculateNextChildWbsId(formData.parent_id)
-        setFormData(prev => ({ ...prev, wbs_id: nextWbsId }))
-      }
+      // Note: WBS ID will be auto-calculated by useEffect when availableParents updates
     }
   }
 

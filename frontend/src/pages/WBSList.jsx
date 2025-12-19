@@ -361,6 +361,7 @@ const WBSList = () => {
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           projectId={projectId}
+          availableWBSList={wbsList}
         />
         {/* 新增成功後顯示回到列表按鈕 */}
         {continueAdding && !editingItem && (
