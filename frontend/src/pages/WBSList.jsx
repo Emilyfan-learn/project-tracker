@@ -285,14 +285,21 @@ const WBSList = () => {
   const getFilteredWBSList = () => {
     let filtered = [...wbsList]
 
-    // Filter: Parent WBS ID
+    // Filter: Parent WBS ID (show parent and its children)
     if (filters.parent_wbs_id) {
       filtered = filtered.filter((item) => {
-        if (!item.parent_id) return false
-        const parentWbsId = item.parent_id.includes('_')
-          ? item.parent_id.split('_')[1]
-          : item.parent_id
-        return parentWbsId === filters.parent_wbs_id
+        // Show the parent item itself
+        if (item.wbs_id === filters.parent_wbs_id) return true
+
+        // Show children of this parent
+        if (item.parent_id) {
+          const parentWbsId = item.parent_id.includes('_')
+            ? item.parent_id.split('_')[1]
+            : item.parent_id
+          return parentWbsId === filters.parent_wbs_id
+        }
+
+        return false
       })
     }
 
