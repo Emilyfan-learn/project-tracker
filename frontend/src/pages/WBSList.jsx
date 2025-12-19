@@ -28,6 +28,7 @@ const WBSList = () => {
   const [myUsername, setMyUsername] = useState('') // For "my responsibility" filter
   const [successMessage, setSuccessMessage] = useState('')
   const [continueAdding, setContinueAdding] = useState(false) // 用於連續新增
+  const [expandedItems, setExpandedItems] = useState(new Set()) // 追蹤展開的項目
   const fileInputRef = useRef(null)
 
   const {
@@ -212,44 +213,91 @@ const WBSList = () => {
     return 'text-gray-600'
   }
 
-  // Build hierarchy structure with indentation levels
-  const buildHierarchy = (items) => {
+  // Toggle expand/collapse for an item
+  const toggleExpand = (wbsId) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(wbsId)) {
+        newSet.delete(wbsId)
+      } else {
+        newSet.add(wbsId)
+      }
+      return newSet
+    })
+  }
+
+  // Expand all items
+  const expandAll = () => {
+    const allWbsIds = new Set()
+    const collectIds = (items) => {
+      items.forEach(item => {
+        if (item.children && item.children.length > 0) {
+          allWbsIds.add(item.wbs_id)
+          collectIds(item.children)
+        }
+      })
+    }
+    const tree = buildHierarchyTree(wbsList)
+    collectIds(tree)
+    setExpandedItems(allWbsIds)
+  }
+
+  // Collapse all items
+  const collapseAll = () => {
+    setExpandedItems(new Set())
+  }
+
+  // Build hierarchy tree structure
+  const buildHierarchyTree = (items) => {
     // Create a map for quick lookup
     const itemMap = new Map()
     items.forEach(item => {
-      itemMap.set(item.wbs_id, { ...item, level: 0, children: [] })
+      itemMap.set(item.wbs_id, { ...item, children: [] })
     })
 
-    // Calculate hierarchy levels
-    const calculateLevel = (wbsId, visited = new Set()) => {
-      if (visited.has(wbsId)) return 0 // Prevent circular references
-      visited.add(wbsId)
-
-      const item = itemMap.get(wbsId)
-      if (!item || !item.parent_id) return 0
-
-      const parent = itemMap.get(item.parent_id)
-      if (!parent) return 0
-
-      return calculateLevel(item.parent_id, visited) + 1
-    }
-
-    // Set levels for all items
+    // Build parent-child relationships
+    const topLevel = []
     items.forEach(item => {
-      const itemWithLevel = itemMap.get(item.wbs_id)
-      if (itemWithLevel) {
-        itemWithLevel.level = calculateLevel(item.wbs_id)
+      const node = itemMap.get(item.wbs_id)
+      if (!item.parent_id) {
+        // Top-level item
+        topLevel.push(node)
+      } else {
+        // Find parent and add as child
+        const parentWbsId = item.parent_id.includes('_')
+          ? item.parent_id.split('_')[1]
+          : item.parent_id
+        const parent = itemMap.get(parentWbsId)
+        if (parent) {
+          parent.children.push(node)
+        } else {
+          // Parent not found, treat as top-level
+          topLevel.push(node)
+        }
       }
     })
 
-    // Sort by WBS ID hierarchically (natural order)
-    // This will automatically group parent and children together
-    // Example: 1, 1.1, 1.1.1, 1.2, 1.3, 2, 2.1, 3
-    return Array.from(itemMap.values()).sort((a, b) => {
+    // Sort children recursively
+    const sortChildren = (node) => {
+      if (node.children && node.children.length > 0) {
+        node.children.sort((a, b) => {
+          const aParts = a.wbs_id.split('.').map(Number)
+          const bParts = b.wbs_id.split('.').map(Number)
+          for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+            const aNum = aParts[i] || 0
+            const bNum = bParts[i] || 0
+            if (aNum !== bNum) return aNum - bNum
+          }
+          return 0
+        })
+        node.children.forEach(child => sortChildren(child))
+      }
+    }
+
+    // Sort top-level items
+    topLevel.sort((a, b) => {
       const aParts = a.wbs_id.split('.').map(Number)
       const bParts = b.wbs_id.split('.').map(Number)
-
-      // Compare each level of the WBS ID
       for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
         const aNum = aParts[i] || 0
         const bNum = bParts[i] || 0
@@ -257,6 +305,23 @@ const WBSList = () => {
       }
       return 0
     })
+
+    topLevel.forEach(node => sortChildren(node))
+
+    return topLevel
+  }
+
+  // Flatten hierarchy tree for display (considering expand/collapse state)
+  const flattenHierarchy = (tree, level = 0) => {
+    const result = []
+    tree.forEach(node => {
+      result.push({ ...node, level })
+      // Only show children if this node is expanded
+      if (node.children && node.children.length > 0 && expandedItems.has(node.wbs_id)) {
+        result.push(...flattenHierarchy(node.children, level + 1))
+      }
+    })
+    return result
   }
 
   // Apply smart filters to WBS list
@@ -321,7 +386,10 @@ const WBSList = () => {
       })
     }
 
-    return buildHierarchy(filtered)
+    // Build hierarchy tree
+    const tree = buildHierarchyTree(filtered)
+    // Flatten for display based on expand/collapse state
+    return flattenHierarchy(tree)
   }
 
   const filteredWBSList = getFilteredWBSList()
@@ -621,6 +689,22 @@ const WBSList = () => {
       {/* WBS List */}
       {!loading && (
         <>
+          {/* Hierarchy Controls */}
+          <div className="mb-3 flex justify-end gap-2">
+            <button
+              onClick={expandAll}
+              className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded"
+            >
+              ➕ 全部展開
+            </button>
+            <button
+              onClick={collapseAll}
+              className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded"
+            >
+              ➖ 全部收起
+            </button>
+          </div>
+
           <div className="bg-white shadow-md rounded-lg overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -683,12 +767,23 @@ const WBSList = () => {
                       {/* WBS ID 欄位 */}
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <div className="flex items-center gap-1">
-                          {/* Visual hierarchy indicator */}
-                          {item.level > 0 && (
-                            <span className="text-gray-400 text-xs">
-                              {'  '.repeat(item.level)}└─
-                            </span>
+                          {/* Indentation based on level */}
+                          <span style={{ width: `${item.level * 20}px` }} className="inline-block"></span>
+
+                          {/* Expand/Collapse button */}
+                          {item.children && item.children.length > 0 ? (
+                            <button
+                              onClick={() => toggleExpand(item.wbs_id)}
+                              className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                              title={expandedItems.has(item.wbs_id) ? '收起' : '展開'}
+                            >
+                              {expandedItems.has(item.wbs_id) ? '▼' : '▶'}
+                            </button>
+                          ) : (
+                            <span className="w-5 h-5 inline-block"></span>
                           )}
+
+                          {/* WBS ID */}
                           <span className={item.level > 0 ? 'text-blue-600' : 'text-gray-900 font-bold'}>
                             {item.wbs_id}
                           </span>
