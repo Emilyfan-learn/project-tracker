@@ -16,6 +16,7 @@ const WBSList = () => {
   const [projectId, setProjectId] = useState(searchParams.get('project') || 'PRJ001')
   const [filters, setFilters] = useState({
     status: '',
+    parent_wbs_id: '', // 新增父WBS ID篩選
   })
   const [smartFilters, setSmartFilters] = useState({
     myResponsibility: false,
@@ -26,6 +27,7 @@ const WBSList = () => {
   })
   const [myUsername, setMyUsername] = useState('') // For "my responsibility" filter
   const [successMessage, setSuccessMessage] = useState('')
+  const [continueAdding, setContinueAdding] = useState(false) // 用於連續新增
   const fileInputRef = useRef(null)
 
   const {
@@ -112,13 +114,18 @@ const WBSList = () => {
     try {
       if (editingItem) {
         await updateWBS(editingItem.item_id, formData)
-        alert('更新成功')
+        setSuccessMessage('更新成功')
+        setShowForm(false)
+        setEditingItem(null)
+        setContinueAdding(false)
       } else {
         await createWBS(formData)
-        alert('新增成功')
+        setSuccessMessage('新增成功')
+        // 如果是新增，保持在表單頁面以繼續新增
+        setEditingItem(null)
+        setContinueAdding(true)
+        // 不關閉表單，讓用戶可以繼續新增
       }
-      setShowForm(false)
-      setEditingItem(null)
       // Refresh the WBS list to show the new/updated item
       fetchWBS({ project_id: projectId, ...filters })
     } catch (err) {
@@ -129,6 +136,7 @@ const WBSList = () => {
   const handleCancel = () => {
     setShowForm(false)
     setEditingItem(null)
+    setContinueAdding(false)
   }
 
   const handleImportClick = () => {
@@ -234,9 +242,33 @@ const WBSList = () => {
       }
     })
 
-    // Sort by WBS ID to maintain logical order
+    // Sort by parent first, then by WBS ID
     return Array.from(itemMap.values()).sort((a, b) => {
-      // Simple string comparison for WBS IDs like "1", "1.1", "1.2", "2", etc.
+      // Extract parent WBS ID from item_id format
+      const getParentWbsId = (item) => {
+        if (!item.parent_id) return ''
+        return item.parent_id.includes('_') ? item.parent_id.split('_')[1] : item.parent_id
+      }
+
+      const aParent = getParentWbsId(a) || ''
+      const bParent = getParentWbsId(b) || ''
+
+      // First sort by parent
+      if (aParent !== bParent) {
+        if (!aParent) return -1 // Items without parent come first
+        if (!bParent) return 1
+
+        const aParentParts = aParent.split('.').map(Number)
+        const bParentParts = bParent.split('.').map(Number)
+
+        for (let i = 0; i < Math.max(aParentParts.length, bParentParts.length); i++) {
+          const aNum = aParentParts[i] || 0
+          const bNum = bParentParts[i] || 0
+          if (aNum !== bNum) return aNum - bNum
+        }
+      }
+
+      // Then sort by WBS ID
       const aParts = a.wbs_id.split('.').map(Number)
       const bParts = b.wbs_id.split('.').map(Number)
 
@@ -252,6 +284,17 @@ const WBSList = () => {
   // Apply smart filters to WBS list
   const getFilteredWBSList = () => {
     let filtered = [...wbsList]
+
+    // Filter: Parent WBS ID
+    if (filters.parent_wbs_id) {
+      filtered = filtered.filter((item) => {
+        if (!item.parent_id) return false
+        const parentWbsId = item.parent_id.includes('_')
+          ? item.parent_id.split('_')[1]
+          : item.parent_id
+        return parentWbsId === filters.parent_wbs_id
+      })
+    }
 
     // Filter: Only my responsibility
     if (smartFilters.myResponsibility && myUsername) {
@@ -319,6 +362,17 @@ const WBSList = () => {
           onCancel={handleCancel}
           projectId={projectId}
         />
+        {/* 新增成功後顯示回到列表按鈕 */}
+        {continueAdding && !editingItem && (
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={handleCancel}
+              className="btn-secondary"
+            >
+              ← 回到列表
+            </button>
+          </div>
+        )}
       </div>
     )
   }
@@ -390,6 +444,44 @@ const WBSList = () => {
                   ))}
                 </>
               )}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="parent-wbs-filter" className="label">
+              父 WBS ID
+            </label>
+            <select
+              id="parent-wbs-filter"
+              value={filters.parent_wbs_id}
+              onChange={(e) => setFilters({ ...filters, parent_wbs_id: e.target.value })}
+              className="input-field"
+            >
+              <option value="">全部</option>
+              {(() => {
+                // Get unique parent WBS IDs
+                const parentIds = new Set()
+                wbsList.forEach(item => {
+                  if (item.parent_id) {
+                    const parentWbsId = item.parent_id.includes('_')
+                      ? item.parent_id.split('_')[1]
+                      : item.parent_id
+                    parentIds.add(parentWbsId)
+                  }
+                })
+                return Array.from(parentIds).sort((a, b) => {
+                  const aParts = a.split('.').map(Number)
+                  const bParts = b.split('.').map(Number)
+                  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+                    const aNum = aParts[i] || 0
+                    const bNum = bParts[i] || 0
+                    if (aNum !== bNum) return aNum - bNum
+                  }
+                  return 0
+                }).map(id => (
+                  <option key={id} value={id}>{id}</option>
+                ))
+              })()}
             </select>
           </div>
 
@@ -554,7 +646,10 @@ const WBSList = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    WBS
+                    父 WBS ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    WBS ID
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     任務名稱
@@ -588,13 +683,24 @@ const WBSList = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredWBSList.length === 0 ? (
                   <tr>
-                    <td colSpan="10" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="11" className="px-6 py-4 text-center text-gray-500">
                       {wbsList.length === 0 ? '暫無資料' : '無符合篩選條件的資料'}
                     </td>
                   </tr>
                 ) : (
                   filteredWBSList.map((item) => (
                     <tr key={item.item_id} className={item.is_overdue ? 'bg-red-50' : ''}>
+                      {/* 父 WBS ID 欄位 */}
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {item.parent_id ? (
+                          <span className="text-gray-500">
+                            {item.parent_id.includes('_') ? item.parent_id.split('_')[1] : item.parent_id}
+                          </span>
+                        ) : (
+                          <span className="text-gray-300">-</span>
+                        )}
+                      </td>
+                      {/* WBS ID 欄位 */}
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <div className="flex items-center gap-1">
                           {/* Visual hierarchy indicator */}
@@ -606,11 +712,6 @@ const WBSList = () => {
                           <span className={item.level > 0 ? 'text-blue-600' : 'text-gray-900 font-bold'}>
                             {item.wbs_id}
                           </span>
-                          {item.parent_id && (
-                            <span className="text-xs text-gray-400" title={`父項目: ${item.parent_id.split('_')[1] || item.parent_id}`}>
-                              ↑
-                            </span>
-                          )}
                         </div>
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-900">

@@ -102,14 +102,60 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+
+    // When parent_id changes, auto-suggest next child WBS ID
+    if (name === 'parent_id' && value && !initialData) {
+      const nextChildWbsId = calculateNextChildWbsId(value)
+      setFormData((prev) => ({
+        ...prev,
+        parent_id: value,
+        wbs_id: nextChildWbsId,
+      }))
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }))
+    }
+
     // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }))
     }
+  }
+
+  // Calculate next child WBS ID based on parent and existing children
+  const calculateNextChildWbsId = (parentWbsId) => {
+    if (!parentWbsId) return ''
+
+    // Find all children of this parent
+    const children = availableParents.filter(item => {
+      if (!item.parent_id) return false
+      const itemParentWbsId = item.parent_id.includes('_')
+        ? item.parent_id.split('_')[1]
+        : item.parent_id
+      return itemParentWbsId === parentWbsId
+    })
+
+    if (children.length === 0) {
+      // First child
+      return `${parentWbsId}.1`
+    }
+
+    // Find max child number
+    let maxChildNum = 0
+    children.forEach(child => {
+      // Extract child number from wbs_id like "1.2.3" -> 3
+      const parts = child.wbs_id.split('.')
+      if (parts.length > 0) {
+        const childNum = parseInt(parts[parts.length - 1])
+        if (!isNaN(childNum) && childNum > maxChildNum) {
+          maxChildNum = childNum
+        }
+      }
+    })
+
+    return `${parentWbsId}.${maxChildNum + 1}`
   }
 
   const validate = () => {
@@ -153,6 +199,34 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
     })
 
     onSubmit(submitData)
+
+    // If not editing, reset form for continuous adding
+    if (!initialData) {
+      setFormData({
+        project_id: projectId || '',
+        wbs_id: '',
+        parent_id: formData.parent_id, // Keep parent_id
+        task_name: '',
+        category: 'Task',
+        owner_unit: formData.owner_unit, // Keep owner_unit
+        original_planned_start: '',
+        original_planned_end: '',
+        revised_planned_start: '',
+        revised_planned_end: '',
+        actual_start_date: '',
+        actual_end_date: '',
+        work_days: '',
+        actual_progress: 0,
+        status: '未開始',
+        notes: '',
+      })
+
+      // Auto-calculate next WBS ID
+      if (formData.parent_id) {
+        const nextWbsId = calculateNextChildWbsId(formData.parent_id)
+        setFormData(prev => ({ ...prev, wbs_id: nextWbsId }))
+      }
+    }
   }
 
   return (
