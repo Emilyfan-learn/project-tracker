@@ -123,7 +123,7 @@ class WBSService:
                 primary_owner = wbs_data.owner_unit
 
         cursor.execute("""
-            INSERT INTO tracking_items (
+            INSERT OR REPLACE INTO tracking_items (
                 item_id, project_id, wbs_id, parent_id, task_name, item_type, category,
                 owner_unit, owner_type, primary_owner, secondary_owner,
                 original_planned_start, original_planned_end,

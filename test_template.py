@@ -53,9 +53,27 @@ def test_template():
     print(df.to_string())
     print()
 
-    # 3. 測試匯入
+    # 3. 清理舊的測試資料
     print("=" * 60)
-    print("步驟 3: 測試匯入範本")
+    print("步驟 3: 清理舊的測試資料")
+    print("=" * 60)
+
+    import sqlite3
+    from backend.config import settings
+
+    conn = sqlite3.connect(str(settings.database_path))
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tracking_items WHERE project_id = 'TEST_PRJ'")
+    deleted_count = cursor.rowcount
+    conn.commit()
+    conn.close()
+
+    print(f"✓ 已清理 {deleted_count} 筆舊的測試資料")
+    print()
+
+    # 4. 測試匯入
+    print("=" * 60)
+    print("步驟 4: 測試匯入範本")
     print("=" * 60)
 
     try:
@@ -65,12 +83,20 @@ def test_template():
             print(f"✅ 匯入成功!")
             print(f"   - 成功: {import_result['imported']} 筆")
             print(f"   - 失敗: {import_result['failed']} 筆")
+            print()
+
+            if import_result.get('imported_items'):
+                print("✓ 成功匯入的項目:")
+                for item in import_result['imported_items']:
+                    print(f"  第 {item['row']} 行 - WBS ID: {item['wbs_id']} ({item['task_name']})")
+                print()
 
             if import_result['failed'] > 0:
-                print()
-                print("失敗項目:")
+                print("❌ 失敗項目詳情:")
                 for item in import_result.get('failed_items', []):
-                    print(f"  第 {item['row']} 行: {item['error']}")
+                    print(f"  第 {item['row']} 行 - WBS ID: {item['wbs_id']}")
+                    print(f"  錯誤: {item['error']}")
+                    print()
         else:
             print(f"❌ 匯入失敗: {import_result.get('error')}")
 
