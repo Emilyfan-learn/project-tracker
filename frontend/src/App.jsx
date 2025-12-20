@@ -9,6 +9,7 @@ import PendingList from './pages/PendingList'
 import IssueList from './pages/IssueList'
 import GanttView from './pages/GanttView'
 import BackupManagement from './pages/BackupManagement'
+import SystemSettings from './pages/SystemSettings'
 
 function App() {
   return (
@@ -48,6 +49,9 @@ function App() {
                 <Link to="/backup" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                   備份管理
                 </Link>
+                <Link to="/settings" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                  系統設定
+                </Link>
               </nav>
             </div>
           </div>
@@ -63,6 +67,7 @@ function App() {
             <Route path="/issues" element={<IssueList />} />
             <Route path="/gantt" element={<GanttView />} />
             <Route path="/backup" element={<BackupManagement />} />
+            <Route path="/settings" element={<SystemSettings />} />
           </Routes>
         </main>
       </div>
