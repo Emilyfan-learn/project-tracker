@@ -34,6 +34,3 @@ services:
 networks:
   projecttracker-network:
     driver: bridge
-
-volumes:
-  data:
