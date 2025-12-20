@@ -3,9 +3,12 @@
  */
 import React, { useState, useEffect } from 'react'
 import api from '../utils/api'
+import { useSettings } from '../hooks/useSettings'
 
 const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableWBSList = [] }) => {
   const [availableParents, setAvailableParents] = useState([])
+  const [ownerUnits, setOwnerUnits] = useState([])
+  const { fetchOwnerUnits } = useSettings()
   const [formData, setFormData] = useState({
     project_id: projectId || '',
     wbs_id: '',
@@ -85,6 +88,20 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableW
       : availableWBSList
     setAvailableParents(filteredItems)
   }, [availableWBSList, initialData])
+
+  // Fetch owner units for the project
+  useEffect(() => {
+    if (projectId) {
+      fetchOwnerUnits(projectId)
+        .then(units => {
+          setOwnerUnits(units)
+        })
+        .catch(err => {
+          console.error('Failed to fetch owner units:', err)
+          setOwnerUnits([])
+        })
+    }
+  }, [projectId, fetchOwnerUnits])
 
   // Auto-update WBS ID when availableParents changes (for continuous adding)
   useEffect(() => {
@@ -340,9 +357,18 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableW
             name="owner_unit"
             value={formData.owner_unit}
             onChange={handleChange}
-            placeholder="例如: 開發部, AAA/BBB, 客戶"
+            list="owner-units-list"
+            placeholder="選擇或輸入負責單位"
             className="input-field"
           />
+          <datalist id="owner-units-list">
+            {ownerUnits.map((unit, index) => (
+              <option key={index} value={unit} />
+            ))}
+          </datalist>
+          <p className="text-xs text-gray-500 mt-1">
+            從下拉選單選擇或直接輸入新的單位名稱
+          </p>
         </div>
       </div>
 
