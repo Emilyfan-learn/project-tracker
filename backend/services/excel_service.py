@@ -137,8 +137,9 @@ class ExcelService:
                                 parent_id_value = parent_str
 
                     # Handle is_internal - convert various representations to boolean
+                    # Default to False if column doesn't exist in the Excel file
                     is_internal_value = False
-                    if pd.notna(row.get('is_internal')):
+                    if 'is_internal' in row.index and pd.notna(row.get('is_internal')):
                         val = str(row.get('is_internal')).strip().lower()
                         # Accept: 'yes', 'y', 'true', '1', '是', 'v', '✓'
                         is_internal_value = val in ['yes', 'y', 'true', '1', '是', 'v', '✓', 'x']
@@ -356,15 +357,16 @@ class ExcelService:
                 '工作天數',
                 '實際完成進度',
                 '狀態',
+                '內部安排',
                 '備註說明'
             ]
 
             # Create sample data
             sample_data = [
-                ['1', '', '專案啟動', '專案經理', 'Milestone', '01/01/2024', '01/01/2024', '', '', '', '', '', 100, '已完成', '頂層項目範例'],
-                ['1.1', '1', '需求分析', '開發部', 'Task', '01/02/2024', '01/15/2024', '', '', '01/02/2024', '01/14/2024', 10, 100, '已完成', '子項目範例'],
-                ['1.2', '1', '系統設計', 'AAA/BBB', 'Task', '01/16/2024', '01/31/2024', '', '', '01/16/2024', '', 12, 60, '進行中', '子項目範例'],
-                ['2', '', '開發階段', '開發部', 'Milestone', '02/01/2024', '03/31/2024', '', '', '', '', '', 0, '未開始', '頂層項目範例'],
+                ['1', '', '專案啟動', '專案經理', 'Milestone', '01/01/2024', '01/01/2024', '', '', '', '', '', 100, '已完成', '', '頂層項目範例'],
+                ['1.1', '1', '需求分析', '開發部', 'Task', '01/02/2024', '01/15/2024', '', '', '01/02/2024', '01/14/2024', 10, 100, '已完成', '', '子項目範例'],
+                ['1.2', '1', '系統設計', 'AAA/BBB', 'Task', '01/16/2024', '01/31/2024', '', '', '01/16/2024', '', 12, 60, '進行中', 'V', '子項目範例（內部安排）'],
+                ['2', '', '開發階段', '開發部', 'Milestone', '02/01/2024', '03/31/2024', '', '', '', '', '', 0, '未開始', '', '頂層項目範例'],
             ]
 
             df = pd.DataFrame(sample_data, columns=columns)
