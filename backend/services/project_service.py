@@ -16,9 +16,21 @@ class ProjectService:
 
     def _get_connection(self):
         """Get database connection"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        try:
+            # Check if database file exists
+            from pathlib import Path
+            db_file = Path(self.db_path)
+            if not db_file.exists():
+                raise FileNotFoundError(
+                    f"Database file not found at: {self.db_path}. "
+                    "Please ensure the database has been initialized."
+                )
+
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            return conn
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Failed to connect to database at {self.db_path}: {str(e)}")
 
     def create_project(self, project_data: ProjectCreate) -> ProjectResponse:
         """Create a new project"""

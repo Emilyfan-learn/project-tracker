@@ -47,14 +47,30 @@ async def get_project_list(
     - **skip**: Pagination offset
     - **limit**: Number of items per page
     """
-    items = project_service.get_project_list(
-        status=status,
-        skip=skip,
-        limit=limit
-    )
-    total = project_service.get_project_count(status=status)
+    try:
+        items = project_service.get_project_list(
+            status=status,
+            skip=skip,
+            limit=limit
+        )
+        total = project_service.get_project_count(status=status)
 
-    return ProjectListResponse(total=total, items=items)
+        return ProjectListResponse(total=total, items=items)
+    except FileNotFoundError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database not initialized: {str(e)}. Please run database initialization."
+        )
+    except RuntimeError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database connection error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {str(e)}"
+        )
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
