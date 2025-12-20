@@ -61,12 +61,13 @@ async def health_check():
 
 
 # Import and include routers
-from backend.routers import wbs, projects, pending, issues, dependencies, backup
+from backend.routers import wbs, projects, pending, issues, dependencies, backup, settings
 
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 app.include_router(wbs.router, prefix="/api/wbs", tags=["WBS"])
 app.include_router(pending.router, prefix="/api/pending", tags=["Pending Items"])
 app.include_router(issues.router, prefix="/api/issues", tags=["Issue Tracking"])
+app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
 
 # Excel router is optional - only include if pandas is available
 try:
