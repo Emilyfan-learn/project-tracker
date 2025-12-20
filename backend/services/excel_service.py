@@ -184,7 +184,7 @@ class ExcelService:
                     })
 
             return {
-                'success': True,
+                'success': len(imported) > 0,  # 至少要有一筆成功才算成功
                 'imported': len(imported),
                 'failed': len(failed),
                 'imported_items': imported,
