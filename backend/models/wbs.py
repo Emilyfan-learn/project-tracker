@@ -39,6 +39,9 @@ class WBSBase(BaseModel):
     notes: Optional[str] = None
     alert_flag: Optional[str] = None
 
+    # Internal arrangement flag
+    is_internal: bool = Field(default=False, description="Internal arrangement flag")
+
 
 class WBSCreate(WBSBase):
     """Model for creating a new WBS item"""
@@ -69,6 +72,7 @@ class WBSUpdate(BaseModel):
     status: Optional[str] = None
     notes: Optional[str] = None
     alert_flag: Optional[str] = None
+    is_internal: Optional[bool] = None
 
 
 class WBSResponse(WBSBase):

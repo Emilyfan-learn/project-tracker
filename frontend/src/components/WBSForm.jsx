@@ -23,6 +23,7 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableW
     actual_progress: 0,
     status: '未開始',
     notes: '',
+    is_internal: false,
   })
 
   const [errors, setErrors] = useState({})
@@ -98,7 +99,8 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableW
   }, [availableParents, formData.parent_id])
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
+    const fieldValue = type === 'checkbox' ? checked : value
 
     // When parent_id changes, auto-suggest next child WBS ID
     if (name === 'parent_id' && value && !initialData) {
@@ -111,7 +113,7 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableW
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: fieldValue,
       }))
     }
 
@@ -519,6 +521,21 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableW
             <option value="已完成">已完成</option>
           </select>
         </div>
+      </div>
+
+      {/* Internal Arrangement */}
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="is_internal"
+          name="is_internal"
+          checked={formData.is_internal}
+          onChange={handleChange}
+          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+        />
+        <label htmlFor="is_internal" className="ml-2 block text-sm text-gray-700">
+          內部安排
+        </label>
       </div>
 
       {/* Notes */}

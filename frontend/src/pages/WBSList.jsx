@@ -767,6 +767,9 @@ const WBSList = () => {
                   <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '70px' }}>
                     狀態
                   </th>
+                  <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase" style={{ width: '60px' }}>
+                    內部安排
+                  </th>
                   <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '100px' }}>
                     操作
                   </th>
@@ -775,7 +778,7 @@ const WBSList = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredWBSList.length === 0 ? (
                   <tr>
-                    <td colSpan="10" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="11" className="px-6 py-4 text-center text-gray-500">
                       {wbsList.length === 0 ? '暫無資料' : '無符合篩選條件的資料'}
                     </td>
                   </tr>
@@ -882,6 +885,9 @@ const WBSList = () => {
                         >
                           {item.status}
                         </span>
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap text-center text-xs">
+                        {item.is_internal ? '✓' : ''}
                       </td>
                       <td className="px-2 py-2 whitespace-nowrap text-xs font-medium">
                         <button

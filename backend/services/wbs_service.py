@@ -129,9 +129,9 @@ class WBSService:
                 original_planned_start, original_planned_end,
                 revised_planned_start, revised_planned_end,
                 actual_start_date, actual_end_date, work_days,
-                actual_progress, status, notes, alert_flag,
+                actual_progress, status, notes, alert_flag, is_internal,
                 source, source_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             item_id, wbs_data.project_id, wbs_data.wbs_id, parent_item_id,
             wbs_data.task_name, 'WBS', wbs_data.category,
@@ -139,7 +139,7 @@ class WBSService:
             wbs_data.original_planned_start, wbs_data.original_planned_end,
             wbs_data.revised_planned_start, wbs_data.revised_planned_end,
             wbs_data.actual_start_date, wbs_data.actual_end_date, wbs_data.work_days,
-            wbs_data.actual_progress, wbs_data.status, wbs_data.notes, wbs_data.alert_flag,
+            wbs_data.actual_progress, wbs_data.status, wbs_data.notes, wbs_data.alert_flag, wbs_data.is_internal,
             'Manual', date.today()
         ))
 

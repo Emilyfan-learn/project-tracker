@@ -82,6 +82,9 @@ def create_database_schema():
             notes TEXT,
             alert_flag TEXT,
 
+            -- Internal arrangement flag
+            is_internal BOOLEAN DEFAULT 0,
+
             -- Source tracking
             source TEXT,
             source_date DATE,
