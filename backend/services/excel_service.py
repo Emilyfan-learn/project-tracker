@@ -95,8 +95,9 @@ class ExcelService:
                 '內部安排': 'is_internal',
             }
 
-            # Rename columns
-            df = df.rename(columns=column_map)
+            # Only rename columns that exist in the DataFrame
+            existing_column_map = {k: v for k, v in column_map.items() if k in df.columns}
+            df = df.rename(columns=existing_column_map)
 
             # Required columns check
             required_columns = ['wbs_id', 'task_name']
@@ -139,10 +140,11 @@ class ExcelService:
                     # Handle is_internal - convert various representations to boolean
                     # Default to False if column doesn't exist in the Excel file
                     is_internal_value = False
-                    if 'is_internal' in row.index and pd.notna(row.get('is_internal')):
-                        val = str(row.get('is_internal')).strip().lower()
-                        # Accept: 'yes', 'y', 'true', '1', '是', 'v', '✓'
-                        is_internal_value = val in ['yes', 'y', 'true', '1', '是', 'v', '✓', 'x']
+                    if 'is_internal' in df.columns:
+                        if pd.notna(row.get('is_internal')):
+                            val = str(row.get('is_internal')).strip().lower()
+                            # Accept: 'yes', 'y', 'true', '1', '是', 'v', '✓'
+                            is_internal_value = val in ['yes', 'y', 'true', '1', '是', 'v', '✓', 'x']
 
                     wbs_data = {
                         'project_id': project_id,
