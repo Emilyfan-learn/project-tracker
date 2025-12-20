@@ -16,13 +16,19 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy application code
 COPY backend ./backend
-COPY data ./data
 
-# Initialize database
-RUN python backend/init_db.py
+# Copy and set permissions for entrypoint script
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Create data directory structure
+RUN mkdir -p /app/data/backups/daily && \
+    mkdir -p /app/data/backups/weekly && \
+    mkdir -p /app/data/backups/monthly && \
+    mkdir -p /app/data/backups/manual
 
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Use entrypoint script
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
