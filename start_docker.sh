@@ -27,9 +27,30 @@ fi
 echo "✓ Docker 已安裝並執行中"
 echo ""
 
+# Detect Docker Compose command
+if docker compose version &> /dev/null; then
+    COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+else
+    echo "❌ Docker Compose 未安裝"
+    echo ""
+    echo "請安裝 Docker Desktop (包含 Docker Compose)："
+    echo "  brew install --cask docker"
+    echo ""
+    exit 1
+fi
+
+echo "使用命令: $COMPOSE_CMD"
+echo ""
+
+# Clean up any existing containers
+echo "清理舊容器（如果存在）..."
+$COMPOSE_CMD down 2>/dev/null || true
+
 # Build and start containers
 echo "建立並啟動容器..."
-docker compose up -d
+$COMPOSE_CMD up -d --build
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -40,10 +61,10 @@ if [ $? -eq 0 ]; then
     echo "  後端 API: http://localhost:8000/docs"
     echo ""
     echo "查看日誌："
-    echo "  docker compose logs -f"
+    echo "  $COMPOSE_CMD logs -f"
     echo ""
     echo "停止服務："
-    echo "  docker compose down"
+    echo "  ./stop_docker.sh"
     echo ""
 
     # Open browser
@@ -57,7 +78,7 @@ else
     echo "❌ 啟動失敗"
     echo ""
     echo "請檢查錯誤訊息或執行："
-    echo "  docker compose logs"
+    echo "  $COMPOSE_CMD logs"
     echo ""
     exit 1
 fi
