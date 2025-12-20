@@ -176,12 +176,28 @@ const WBSList = () => {
 
     try {
       const result = await importWBSFromExcel(file, projectId)
-      setSuccessMessage(
-        `匯入成功！成功匯入 ${result.imported} 筆，失敗 ${result.failed} 筆`
-      )
 
-      // Refresh WBS list
-      await fetchWBS({ project_id: projectId, ...filters })
+      // 構建訊息
+      let message = `成功匯入 ${result.imported} 筆，失敗 ${result.failed} 筆`
+
+      // 如果有失敗項目，顯示詳細錯誤
+      if (result.failed > 0 && result.failed_items) {
+        message += '\n\n失敗項目詳情：'
+        result.failed_items.forEach(item => {
+          message += `\n第 ${item.row} 行 (${item.wbs_id}): ${item.error}`
+        })
+      }
+
+      if (result.imported > 0) {
+        setSuccessMessage(message)
+      } else {
+        alert('匯入失敗\n' + message)
+      }
+
+      // Refresh WBS list if any items were imported
+      if (result.imported > 0) {
+        await fetchWBS({ project_id: projectId, ...filters })
+      }
 
       // Reset file input
       if (fileInputRef.current) {
