@@ -3,6 +3,7 @@ Configuration settings for the Project Tracker application
 """
 from pydantic_settings import BaseSettings
 from pathlib import Path
+import os
 
 
 class Settings(BaseSettings):
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
 
     # Database Settings
     database_url: str = "sqlite+aiosqlite:///./data/project_tracking.db"
-    database_path: Path = Path("./data/project_tracking.db")
+    database_path: Path = Path(os.getenv("DATABASE_PATH", "./data/project_tracking.db"))
 
     # Backup Settings
     backup_base_path: Path = Path("./data/backups")
