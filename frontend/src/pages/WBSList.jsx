@@ -832,21 +832,21 @@ const WBSList = () => {
                         {item.owner_unit || '-'}
                       </td>
                       <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
-                        {item.original_planned_start ? item.original_planned_start.substring(5) : '-'}
+                        {item.original_planned_start ? item.original_planned_start.substring(5).replace('-', '/') : '-'}
                       </td>
                       <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
-                        {item.original_planned_end ? item.original_planned_end.substring(5) : '-'}
+                        {item.original_planned_end ? item.original_planned_end.substring(5).replace('-', '/') : '-'}
                       </td>
                       <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
                         {item.revised_planned_start ? (
-                          <span className="text-blue-600">{item.revised_planned_start.substring(5)}</span>
+                          <span className="text-blue-600">{item.revised_planned_start.substring(5).replace('-', '/')}</span>
                         ) : (
                           '-'
                         )}
                       </td>
                       <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
                         {item.revised_planned_end ? (
-                          <span className="text-blue-600">{item.revised_planned_end.substring(5)}</span>
+                          <span className="text-blue-600">{item.revised_planned_end.substring(5).replace('-', '/')}</span>
                         ) : (
                           '-'
                         )}
