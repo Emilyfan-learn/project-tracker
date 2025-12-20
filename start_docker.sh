@@ -44,6 +44,10 @@ fi
 echo "使用命令: $COMPOSE_CMD"
 echo ""
 
+# Clean up any existing containers
+echo "清理舊容器（如果存在）..."
+$COMPOSE_CMD down 2>/dev/null || true
+
 # Build and start containers
 echo "建立並啟動容器..."
 $COMPOSE_CMD up -d --build
