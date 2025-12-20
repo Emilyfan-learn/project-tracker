@@ -123,10 +123,15 @@ class ExcelService:
                     parent_id_value = None
                     if pd.notna(row.get('parent_id')):
                         parent_str = str(row.get('parent_id')).strip()
-                        # Remove .0 suffix if it's a number like 1.0, 2.0
+                        # Only remove .0 suffix if it's purely numeric (like 1.0 -> 1, 2.0 -> 2)
+                        # But keep WBS IDs like 2.2, 1.1.3 intact
                         if parent_str and parent_str != 'nan':
-                            if '.' in parent_str and parent_str.replace('.', '').isdigit():
-                                parent_str = parent_str.split('.')[0]
+                            # Check if it ends with .0 and has only one decimal point (purely numeric)
+                            if parent_str.endswith('.0'):
+                                # Check if removing .0 leaves a valid integer
+                                base = parent_str[:-2]  # Remove .0
+                                if base.isdigit():
+                                    parent_str = base
                             if parent_str:
                                 parent_id_value = parent_str
 
