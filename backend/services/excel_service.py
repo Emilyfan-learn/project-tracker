@@ -35,8 +35,8 @@ class ExcelService:
             if not date_str:
                 return None
 
-            # Try different formats
-            for fmt in ['%m/%d/%Y', '%Y-%m-%d', '%d/%m/%Y', '%Y/%m/%d']:
+            # Try different formats (prioritize yyyy/mm/dd format)
+            for fmt in ['%Y/%m/%d', '%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y']:
                 try:
                     dt = datetime.strptime(date_str, fmt)
                     return dt.strftime('%Y-%m-%d')
@@ -119,10 +119,21 @@ class ExcelService:
                         continue
 
                     # Prepare WBS data
+                    # Handle parent_id - convert to string and clean up
+                    parent_id_value = None
+                    if pd.notna(row.get('parent_id')):
+                        parent_str = str(row.get('parent_id')).strip()
+                        # Remove .0 suffix if it's a number like 1.0, 2.0
+                        if parent_str and parent_str != 'nan':
+                            if '.' in parent_str and parent_str.replace('.', '').isdigit():
+                                parent_str = parent_str.split('.')[0]
+                            if parent_str:
+                                parent_id_value = parent_str
+
                     wbs_data = {
                         'project_id': project_id,
                         'wbs_id': str(row['wbs_id']).strip(),
-                        'parent_id': str(row.get('parent_id', '')).strip() if pd.notna(row.get('parent_id')) and str(row.get('parent_id', '')).strip() else None,
+                        'parent_id': parent_id_value,
                         'task_name': str(row.get('task_name', '')).strip(),
                         'category': str(row.get('category', 'Task')).strip() or 'Task',
                         'owner_unit': str(row.get('owner_unit', '')).strip() if pd.notna(row.get('owner_unit')) else None,
