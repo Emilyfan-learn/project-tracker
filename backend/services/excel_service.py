@@ -92,6 +92,7 @@ class ExcelService:
                 '實際完成進度': 'actual_progress',
                 '狀態': 'status',
                 '備註說明': 'notes',
+                '內部安排': 'is_internal',
             }
 
             # Rename columns
@@ -135,6 +136,13 @@ class ExcelService:
                             if parent_str:
                                 parent_id_value = parent_str
 
+                    # Handle is_internal - convert various representations to boolean
+                    is_internal_value = False
+                    if pd.notna(row.get('is_internal')):
+                        val = str(row.get('is_internal')).strip().lower()
+                        # Accept: 'yes', 'y', 'true', '1', '是', 'v', '✓'
+                        is_internal_value = val in ['yes', 'y', 'true', '1', '是', 'v', '✓', 'x']
+
                     wbs_data = {
                         'project_id': project_id,
                         'wbs_id': str(row['wbs_id']).strip(),
@@ -152,6 +160,7 @@ class ExcelService:
                         'actual_progress': int(row.get('actual_progress', 0)) if pd.notna(row.get('actual_progress')) else 0,
                         'status': str(row.get('status', '未開始')).strip() or '未開始',
                         'notes': str(row.get('notes', '')).strip() if pd.notna(row.get('notes')) else None,
+                        'is_internal': is_internal_value,
                     }
 
                     # Create WBS item
@@ -217,6 +226,7 @@ class ExcelService:
                     progress_variance,
                     status,
                     notes,
+                    is_internal,
                     is_overdue
                 FROM tracking_items
                 WHERE project_id = ? AND item_type = 'WBS'
@@ -252,11 +262,13 @@ class ExcelService:
                 'progress_variance': '進度偏差',
                 'status': '狀態',
                 'notes': '備註說明',
+                'is_internal': '內部安排',
                 'is_overdue': '逾期'
             })
 
             # Convert boolean to Chinese
             df['逾期'] = df['逾期'].apply(lambda x: '是' if x == 1 else '否')
+            df['內部安排'] = df['內部安排'].apply(lambda x: 'V' if x == 1 else '')
 
             # Create Excel writer
             with pd.ExcelWriter(output_path, engine='openpyxl') as writer:

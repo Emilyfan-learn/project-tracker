@@ -13,6 +13,10 @@ const GanttView = () => {
   const [viewMode, setViewMode] = useState('Day')
   const [selectedTask, setSelectedTask] = useState(null)
   const [showTaskDetail, setShowTaskDetail] = useState(false)
+  const [dateFilter, setDateFilter] = useState({
+    startDate: '',
+    endDate: ''
+  })
 
   const { wbsList, loading, error, fetchWBS } = useWBS()
 
@@ -53,6 +57,42 @@ const GanttView = () => {
     console.log('Date changed:', taskId, start, end)
     // TODO: Implement date change API call
     alert(`任務 ${taskId} 日期已更改:\n開始: ${start.toLocaleDateString('zh-TW')}\n結束: ${end.toLocaleDateString('zh-TW')}`)
+  }
+
+  // Filter WBS list by date range
+  const filteredWbsList = wbsList.filter(item => {
+    if (!dateFilter.startDate && !dateFilter.endDate) {
+      return true // No filter applied
+    }
+
+    // Get the relevant date (use revised if available, otherwise original)
+    const itemStartDate = item.revised_planned_start || item.original_planned_start
+    const itemEndDate = item.revised_planned_end || item.original_planned_end
+
+    // Check if item falls within the date range
+    if (dateFilter.startDate && itemEndDate) {
+      if (itemEndDate < dateFilter.startDate) return false
+    }
+    if (dateFilter.endDate && itemStartDate) {
+      if (itemStartDate > dateFilter.endDate) return false
+    }
+
+    return true
+  })
+
+  const handleDateFilterChange = (e) => {
+    const { name, value } = e.target
+    setDateFilter(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const clearDateFilter = () => {
+    setDateFilter({
+      startDate: '',
+      endDate: ''
+    })
   }
 
   const viewModes = [
@@ -116,6 +156,47 @@ const GanttView = () => {
             </select>
           </div>
 
+          {/* Date Range Filter */}
+          <div>
+            <label htmlFor="start-date" className="label">
+              開始日期
+            </label>
+            <input
+              type="date"
+              id="start-date"
+              name="startDate"
+              value={dateFilter.startDate}
+              onChange={handleDateFilterChange}
+              className="input-field"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="end-date" className="label">
+              結束日期
+            </label>
+            <input
+              type="date"
+              id="end-date"
+              name="endDate"
+              value={dateFilter.endDate}
+              onChange={handleDateFilterChange}
+              className="input-field"
+            />
+          </div>
+
+          {/* Clear Filter Button */}
+          {(dateFilter.startDate || dateFilter.endDate) && (
+            <div className="mt-6">
+              <button
+                onClick={clearDateFilter}
+                className="btn-secondary"
+              >
+                清除篩選
+              </button>
+            </div>
+          )}
+
           {/* Reload Button */}
           <div className="mt-6">
             <button
@@ -129,7 +210,11 @@ const GanttView = () => {
 
           {/* Stats */}
           <div className="ml-auto text-sm text-gray-600">
-            共 {wbsList.length} 個任務
+            {dateFilter.startDate || dateFilter.endDate ? (
+              <>顯示 {filteredWbsList.length} / {wbsList.length} 個任務</>
+            ) : (
+              <>共 {wbsList.length} 個任務</>
+            )}
           </div>
         </div>
       </div>
@@ -150,10 +235,10 @@ const GanttView = () => {
       )}
 
       {/* Gantt Chart */}
-      {!loading && wbsList.length > 0 && (
+      {!loading && filteredWbsList.length > 0 && (
         <div className="bg-white p-6 rounded-lg shadow">
           <GanttChart
-            tasks={wbsList}
+            tasks={filteredWbsList}
             viewMode={viewMode}
             onTaskClick={handleTaskClick}
             onDateChange={handleDateChange}
@@ -166,6 +251,14 @@ const GanttView = () => {
         <div className="bg-white p-8 rounded-lg shadow text-center text-gray-500">
           <p className="text-lg">暫無 WBS 資料</p>
           <p className="mt-2 text-sm">請先建立 WBS 項目或選擇其他專案</p>
+        </div>
+      )}
+
+      {/* No Data After Filter */}
+      {!loading && wbsList.length > 0 && filteredWbsList.length === 0 && (
+        <div className="bg-white p-8 rounded-lg shadow text-center text-gray-500">
+          <p className="text-lg">無符合條件的 WBS 資料</p>
+          <p className="mt-2 text-sm">請調整日期篩選條件</p>
         </div>
       )}
 
