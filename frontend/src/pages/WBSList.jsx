@@ -737,37 +737,37 @@ const WBSList = () => {
           </div>
 
           <div className="bg-white shadow-md rounded-lg overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '120px' }}>
                     WBS ID
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ minWidth: '150px' }}>
                     任務名稱
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '100px' }}>
                     負責單位
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '85px' }}>
                     預計開始
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '85px' }}>
                     預計結束
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    調整後開始
+                  <th className="px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '85px' }}>
+                    調整開始
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    調整後結束
+                  <th className="px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '85px' }}>
+                    調整結束
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '100px' }}>
                     進度
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '70px' }}>
                     狀態
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '100px' }}>
                     操作
                   </th>
                 </tr>
@@ -783,7 +783,7 @@ const WBSList = () => {
                   filteredWBSList.map((item) => (
                     <tr key={item.item_id} className={item.is_overdue ? 'bg-red-50' : ''}>
                       {/* WBS ID 欄位 */}
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-2 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
                         <div className="flex items-center gap-1">
                           {/* Indentation based on level */}
                           <span style={{ width: `${item.level * 20}px` }} className="inline-block"></span>
@@ -807,8 +807,8 @@ const WBSList = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-900">
-                        <div className="flex items-center gap-2">
+                      <td className="px-2 py-2 text-xs text-gray-900">
+                        <div className="flex items-center gap-1">
                           <span className={item.level > 0 ? 'font-normal' : 'font-semibold'}>
                             {item.task_name}
                           </span>
@@ -828,30 +828,30 @@ const WBSList = () => {
                           })()}
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
                         {item.owner_unit || '-'}
                       </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.original_planned_start || '-'}
+                      <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
+                        {item.original_planned_start ? item.original_planned_start.substring(5) : '-'}
                       </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.original_planned_end || '-'}
+                      <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
+                        {item.original_planned_end ? item.original_planned_end.substring(5) : '-'}
                       </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
                         {item.revised_planned_start ? (
-                          <span className="text-blue-600">{item.revised_planned_start}</span>
+                          <span className="text-blue-600">{item.revised_planned_start.substring(5)}</span>
                         ) : (
                           '-'
                         )}
                       </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-1 py-2 whitespace-nowrap text-xs text-gray-500">
                         {item.revised_planned_end ? (
-                          <span className="text-blue-600">{item.revised_planned_end}</span>
+                          <span className="text-blue-600">{item.revised_planned_end.substring(5)}</span>
                         ) : (
                           '-'
                         )}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                      <td className="px-2 py-2 whitespace-nowrap text-xs">
                         <div className="flex flex-col">
                           <div className="flex items-center">
                             <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
@@ -874,19 +874,19 @@ const WBSList = () => {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2 py-2 whitespace-nowrap">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeColor(
+                          className={`px-1.5 py-0.5 inline-flex text-xs leading-tight font-semibold rounded ${getStatusBadgeColor(
                             item.status
                           )}`}
                         >
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-2 py-2 whitespace-nowrap text-xs font-medium">
                         <button
                           onClick={() => handleEdit(item)}
-                          className="text-primary-600 hover:text-primary-900 mr-3"
+                          className="text-primary-600 hover:text-primary-900 mr-2"
                         >
                           編輯
                         </button>
