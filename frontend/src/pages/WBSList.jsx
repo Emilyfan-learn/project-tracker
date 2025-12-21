@@ -29,6 +29,7 @@ const WBSList = () => {
   const [continueAdding, setContinueAdding] = useState(false) // 用於連續新增
   const [expandedItems, setExpandedItems] = useState(new Set()) // 追蹤展開的項目
   const [initialExpand, setInitialExpand] = useState(false) // 追蹤是否已初始展開
+  const [currentPage, setCurrentPage] = useState(1) // 當前頁碼
   const fileInputRef = useRef(null)
 
   const {
@@ -76,8 +77,14 @@ const WBSList = () => {
 
   useEffect(() => {
     const itemsPerPage = getSystemSetting('items_per_page', 1000)
-    fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage })
-  }, [fetchWBS, projectId, filters, systemSettings, getSystemSetting])
+    const offset = (currentPage - 1) * itemsPerPage
+    fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage, offset })
+  }, [fetchWBS, projectId, filters, currentPage, systemSettings, getSystemSetting])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [projectId, filters, smartFilters])
 
   // Update URL when projectId changes
   useEffect(() => {
@@ -603,7 +610,8 @@ const WBSList = () => {
             <button
               onClick={() => {
                 const itemsPerPage = getSystemSetting('items_per_page', 1000)
-                fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage })
+                const offset = (currentPage - 1) * itemsPerPage
+                fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage, offset })
               }}
               className="btn-secondary"
             >
@@ -902,15 +910,72 @@ const WBSList = () => {
             </table>
           </div>
 
-          {/* Summary */}
-          <div className="mt-4 text-sm text-gray-600">
-            {filteredWBSList.length !== wbsList.length ? (
-              <>
-                顯示 {filteredWBSList.length} 筆（共 {total} 筆資料）
-              </>
-            ) : (
-              <>共 {total} 筆資料</>
-            )}
+          {/* Summary and Pagination */}
+          <div className="mt-4 flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              {filteredWBSList.length !== wbsList.length ? (
+                <>
+                  顯示 {filteredWBSList.length} 筆（共 {total} 筆資料）
+                </>
+              ) : (
+                <>
+                  共 {total} 筆資料
+                  {(() => {
+                    const itemsPerPage = getSystemSetting('items_per_page', 1000)
+                    const totalPages = Math.ceil(total / itemsPerPage)
+                    if (totalPages > 1) {
+                      const startItem = (currentPage - 1) * itemsPerPage + 1
+                      const endItem = Math.min(currentPage * itemsPerPage, total)
+                      return ` | 顯示第 ${startItem}-${endItem} 筆`
+                    }
+                    return null
+                  })()}
+                </>
+              )}
+            </div>
+
+            {/* Pagination Controls */}
+            {(() => {
+              const itemsPerPage = getSystemSetting('items_per_page', 1000)
+              const totalPages = Math.ceil(total / itemsPerPage)
+
+              if (totalPages <= 1) return null
+
+              return (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ← 上一頁
+                  </button>
+
+                  <span className="text-sm text-gray-600">
+                    第 {currentPage} / {totalPages} 頁
+                  </span>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    下一頁 →
+                  </button>
+
+                  {/* Quick page jump */}
+                  <select
+                    value={currentPage}
+                    onChange={(e) => setCurrentPage(Number(e.target.value))}
+                    className="ml-2 px-2 py-1 text-sm border border-gray-300 rounded"
+                  >
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <option key={page} value={page}>第 {page} 頁</option>
+                    ))}
+                  </select>
+                </div>
+              )
+            })()}
           </div>
         </>
       )}
