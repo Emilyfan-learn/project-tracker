@@ -101,7 +101,8 @@ const WBSForm = ({ initialData = null, onSubmit, onCancel, projectId, availableW
           setOwnerUnits([])
         })
     }
-  }, [projectId, fetchOwnerUnits])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId])
 
   // Auto-update WBS ID when availableParents changes (for continuous adding)
   useEffect(() => {
