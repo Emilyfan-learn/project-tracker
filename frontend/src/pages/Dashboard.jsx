@@ -118,6 +118,7 @@ const Dashboard = () => {
             name: w.task_name,
             dueDate: w.revised_planned_end || w.original_planned_end,
             status: w.status,
+            projectId: w.project_id,
           })),
         ...pendingItems
           .filter((p) => {
@@ -132,6 +133,7 @@ const Dashboard = () => {
             name: p.description,
             dueDate: p.expected_reply_date,
             status: p.status,
+            projectId: p.project_id,
           })),
         ...issueItems
           .filter((i) => {
@@ -146,6 +148,7 @@ const Dashboard = () => {
             name: i.issue_title,
             dueDate: i.target_resolution_date,
             status: i.status,
+            projectId: i.project_id,
           })),
       ]
       setOverdueItems(overdue.slice(0, 5))
@@ -177,6 +180,7 @@ const Dashboard = () => {
             name: w.task_name,
             startDate: w.revised_planned_start || w.original_planned_start,
             status: w.status,
+            projectId: w.project_id,
           })),
       ]
       setShouldStartItems(shouldStart.slice(0, 5))
@@ -202,6 +206,7 @@ const Dashboard = () => {
             name: w.task_name,
             dueDate: w.revised_planned_end || w.original_planned_end,
             status: w.status,
+            projectId: w.project_id,
           })),
         ...pendingItems
           .filter((p) => {
@@ -217,6 +222,7 @@ const Dashboard = () => {
             name: p.description,
             dueDate: p.expected_reply_date,
             status: p.status,
+            projectId: p.project_id,
           })),
         ...issueItems
           .filter((i) => {
@@ -232,6 +238,7 @@ const Dashboard = () => {
             name: i.issue_title,
             dueDate: i.target_resolution_date,
             status: i.status,
+            projectId: i.project_id,
           })),
       ]
       setDueTodayItems(dueToday.slice(0, 5))
@@ -252,6 +259,7 @@ const Dashboard = () => {
             name: w.task_name,
             dueDate: w.revised_planned_end || w.original_planned_end,
             daysUntilDue: Math.ceil((new Date(w.revised_planned_end || w.original_planned_end) - now) / (1000 * 60 * 60 * 24)),
+            projectId: w.project_id,
           })),
         ...pendingItems
           .filter((p) => {
@@ -266,6 +274,7 @@ const Dashboard = () => {
             name: p.description,
             dueDate: p.expected_reply_date,
             daysUntilDue: Math.ceil((new Date(p.expected_reply_date) - now) / (1000 * 60 * 60 * 24)),
+            projectId: p.project_id,
           })),
       ]
       setDueSoonItems(dueSoon.slice(0, 5))
@@ -361,7 +370,11 @@ const Dashboard = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {dueTodayItems.map((item, idx) => {
-                const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                const linkTo = item.type === 'WBS'
+                  ? `/wbs?project=${item.projectId}`
+                  : item.type === 'Pending'
+                    ? `/pending?project=${item.projectId}`
+                    : `/issues?project=${item.projectId}`
                 return (
                   <Link
                     key={idx}
@@ -398,7 +411,11 @@ const Dashboard = () => {
                 </div>
                 <div className="space-y-2">
                   {overdueItems.map((item, idx) => {
-                    const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                    const linkTo = item.type === 'WBS'
+                      ? `/wbs?project=${item.projectId}`
+                      : item.type === 'Pending'
+                        ? `/pending?project=${item.projectId}`
+                        : `/issues?project=${item.projectId}`
                     return (
                       <Link
                         key={idx}
@@ -426,7 +443,11 @@ const Dashboard = () => {
                 </div>
                 <div className="space-y-2">
                   {shouldStartItems.map((item, idx) => {
-                    const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                    const linkTo = item.type === 'WBS'
+                      ? `/wbs?project=${item.projectId}`
+                      : item.type === 'Pending'
+                        ? `/pending?project=${item.projectId}`
+                        : `/issues?project=${item.projectId}`
                     return (
                       <Link
                         key={idx}
@@ -471,7 +492,11 @@ const Dashboard = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {dueSoonItems.map((item, idx) => {
-                const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                const linkTo = item.type === 'WBS'
+                  ? `/wbs?project=${item.projectId}`
+                  : item.type === 'Pending'
+                    ? `/pending?project=${item.projectId}`
+                    : `/issues?project=${item.projectId}`
                 return (
                   <Link
                     key={idx}
