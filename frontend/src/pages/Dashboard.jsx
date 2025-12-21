@@ -113,6 +113,7 @@ const Dashboard = () => {
           .map((w) => ({
             type: 'WBS',
             id: w.wbs_id,
+            code: w.wbs_id,
             name: w.task_name,
             dueDate: w.revised_planned_end || w.original_planned_end,
             status: w.status,
@@ -126,6 +127,7 @@ const Dashboard = () => {
           .map((p) => ({
             type: 'Pending',
             id: p.pending_id,
+            code: p.pending_id,
             name: p.description,
             dueDate: p.expected_reply_date,
             status: p.status,
@@ -139,6 +141,7 @@ const Dashboard = () => {
           .map((i) => ({
             type: 'Issue',
             id: i.issue_id,
+            code: i.issue_id,
             name: i.issue_title,
             dueDate: i.target_resolution_date,
             status: i.status,
@@ -164,6 +167,7 @@ const Dashboard = () => {
           .map((w) => ({
             type: 'WBS',
             id: w.wbs_id,
+            code: w.wbs_id,
             name: w.task_name,
             dueDate: w.revised_planned_end || w.original_planned_end,
             status: w.status,
@@ -178,6 +182,7 @@ const Dashboard = () => {
           .map((p) => ({
             type: 'Pending',
             id: p.pending_id,
+            code: p.pending_id,
             name: p.description,
             dueDate: p.expected_reply_date,
             status: p.status,
@@ -192,6 +197,7 @@ const Dashboard = () => {
           .map((i) => ({
             type: 'Issue',
             id: i.issue_id,
+            code: i.issue_id,
             name: i.issue_title,
             dueDate: i.target_resolution_date,
             status: i.status,
@@ -211,6 +217,7 @@ const Dashboard = () => {
           .map((w) => ({
             type: 'WBS',
             id: w.wbs_id,
+            code: w.wbs_id,
             name: w.task_name,
             dueDate: w.revised_planned_end || w.original_planned_end,
             daysUntilDue: Math.ceil((new Date(w.revised_planned_end || w.original_planned_end) - now) / (1000 * 60 * 60 * 24)),
@@ -224,6 +231,7 @@ const Dashboard = () => {
           .map((p) => ({
             type: 'Pending',
             id: p.pending_id,
+            code: p.pending_id,
             name: p.description,
             dueDate: p.expected_reply_date,
             daysUntilDue: Math.ceil((new Date(p.expected_reply_date) - now) / (1000 * 60 * 60 * 24)),
@@ -334,6 +342,7 @@ const Dashboard = () => {
                         <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold mr-2">
                           {item.type}
                         </span>
+                        <span className="text-blue-600 font-mono text-xs mr-2">[{item.code}]</span>
                         <span className="font-medium hover:text-blue-700">{item.name}</span>
                       </span>
                       <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded ml-2">
@@ -366,7 +375,9 @@ const Dashboard = () => {
                         className="flex justify-between items-center text-sm text-red-800 hover:text-red-900 hover:bg-red-100 p-2 rounded transition-colors"
                       >
                         <span>
-                          <span className="font-semibold">[{item.type}]</span> {item.name}
+                          <span className="font-semibold">[{item.type}]</span>
+                          <span className="text-red-600 font-mono text-xs mx-2">[{item.code}]</span>
+                          {item.name}
                         </span>
                         <span className="text-red-600 text-xs">{item.dueDate}</span>
                       </Link>
@@ -409,7 +420,9 @@ const Dashboard = () => {
                     className="flex justify-between items-center text-sm text-yellow-800 hover:text-yellow-900 hover:bg-yellow-100 p-2 rounded transition-colors"
                   >
                     <span>
-                      <span className="font-semibold">[{item.type}]</span> {item.name}
+                      <span className="font-semibold">[{item.type}]</span>
+                      <span className="text-yellow-700 font-mono text-xs mx-2">[{item.code}]</span>
+                      {item.name}
                     </span>
                     <span className="text-yellow-600 text-xs">{item.daysUntilDue} 天後</span>
                   </Link>
