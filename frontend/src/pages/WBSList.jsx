@@ -19,13 +19,11 @@ const WBSList = () => {
     parent_wbs_id: '', // 新增父WBS ID篩選
   })
   const [smartFilters, setSmartFilters] = useState({
-    myResponsibility: false,
-    clientResponsibility: false,
-    internalOnly: false,
     overdueOnly: false,
     dueThisWeek: false,
+    ownerUnit: '',
+    wbsCode: '',
   })
-  const [myUsername, setMyUsername] = useState('') // For "my responsibility" filter
   const [successMessage, setSuccessMessage] = useState('')
   const [continueAdding, setContinueAdding] = useState(false) // 用於連續新增
   const [expandedItems, setExpandedItems] = useState(new Set()) // 追蹤展開的項目
@@ -393,23 +391,18 @@ const WBSList = () => {
       })
     }
 
-    // Filter: Only my responsibility
-    if (smartFilters.myResponsibility && myUsername) {
-      filtered = filtered.filter(
-        (item) =>
-          item.primary_owner === myUsername ||
-          item.secondary_owner === myUsername
+    // Filter: Owner Unit
+    if (smartFilters.ownerUnit && smartFilters.ownerUnit.trim()) {
+      filtered = filtered.filter((item) =>
+        item.owner_unit?.toLowerCase().includes(smartFilters.ownerUnit.toLowerCase())
       )
     }
 
-    // Filter: Only client responsibility
-    if (smartFilters.clientResponsibility) {
-      filtered = filtered.filter((item) => item.owner_type === 'Client')
-    }
-
-    // Filter: Only internal items
-    if (smartFilters.internalOnly) {
-      filtered = filtered.filter((item) => item.owner_type === 'Internal')
+    // Filter: WBS Code
+    if (smartFilters.wbsCode && smartFilters.wbsCode.trim()) {
+      filtered = filtered.filter((item) =>
+        item.wbs_id?.toLowerCase().includes(smartFilters.wbsCode.toLowerCase())
+      )
     }
 
     // Filter: Only overdue items
@@ -610,56 +603,34 @@ const WBSList = () => {
         {/* Smart Filters */}
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">智慧篩選</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {/* My Responsibility Filter */}
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center text-sm">
-                <input
-                  type="checkbox"
-                  checked={smartFilters.myResponsibility}
-                  onChange={(e) =>
-                    setSmartFilters({ ...smartFilters, myResponsibility: e.target.checked })
-                  }
-                  className="mr-2 rounded"
-                />
-                <span className="text-gray-700">只看我負責的</span>
-              </label>
-              {smartFilters.myResponsibility && (
-                <input
-                  type="text"
-                  value={myUsername}
-                  onChange={(e) => setMyUsername(e.target.value)}
-                  placeholder="輸入您的姓名"
-                  className="input-field text-sm ml-6"
-                />
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Owner Unit Filter */}
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-gray-700 font-medium">負責單位</label>
+              <input
+                type="text"
+                value={smartFilters.ownerUnit}
+                onChange={(e) =>
+                  setSmartFilters({ ...smartFilters, ownerUnit: e.target.value })
+                }
+                placeholder="輸入負責單位"
+                className="input-field text-sm"
+              />
             </div>
 
-            {/* Client Responsibility Filter */}
-            <label className="flex items-center text-sm">
+            {/* WBS Code Filter */}
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-gray-700 font-medium">WBS Code</label>
               <input
-                type="checkbox"
-                checked={smartFilters.clientResponsibility}
+                type="text"
+                value={smartFilters.wbsCode}
                 onChange={(e) =>
-                  setSmartFilters({ ...smartFilters, clientResponsibility: e.target.checked })
+                  setSmartFilters({ ...smartFilters, wbsCode: e.target.value })
                 }
-                className="mr-2 rounded"
+                placeholder="輸入 WBS 編號"
+                className="input-field text-sm"
               />
-              <span className="text-gray-700">只看客戶責任</span>
-            </label>
-
-            {/* Internal Only Filter */}
-            <label className="flex items-center text-sm">
-              <input
-                type="checkbox"
-                checked={smartFilters.internalOnly}
-                onChange={(e) =>
-                  setSmartFilters({ ...smartFilters, internalOnly: e.target.checked })
-                }
-                className="mr-2 rounded"
-              />
-              <span className="text-gray-700">只看內部項目</span>
-            </label>
+            </div>
 
             {/* Overdue Only Filter */}
             <label className="flex items-center text-sm">
@@ -691,18 +662,17 @@ const WBSList = () => {
             </label>
 
             {/* Clear All Filters Button */}
-            {Object.values(smartFilters).some((v) => v) && (
+            {(smartFilters.ownerUnit || smartFilters.wbsCode || smartFilters.overdueOnly || smartFilters.dueThisWeek) && (
               <button
                 onClick={() =>
                   setSmartFilters({
-                    myResponsibility: false,
-                    clientResponsibility: false,
-                    internalOnly: false,
                     overdueOnly: false,
                     dueThisWeek: false,
+                    ownerUnit: '',
+                    wbsCode: '',
                   })
                 }
-                className="text-sm text-primary-600 hover:text-primary-800 underline"
+                className="text-sm text-primary-600 hover:text-primary-800 underline self-end"
               >
                 清除所有篩選
               </button>
