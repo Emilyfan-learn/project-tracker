@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useWBS } from '../hooks/useWBS'
 import { useProjects } from '../hooks/useProjects'
+import { useSettings } from '../hooks/useSettings'
 import GanttChart from '../components/GanttChart'
 
 const GanttView = () => {
@@ -19,22 +20,29 @@ const GanttView = () => {
   })
 
   const { wbsList, loading, error, fetchWBS } = useWBS()
-
-  const {
-    projectsList,
-    fetchProjects,
-  } = useProjects()
+  const { projectsList, fetchProjects } = useProjects()
+  const { systemSettings, fetchSystemSettings, getSystemSetting } = useSettings()
 
   useEffect(() => {
     fetchProjects()
-  }, [fetchProjects])
+    fetchSystemSettings()
+  }, [fetchProjects, fetchSystemSettings])
+
+  // Apply default view mode from system settings
+  useEffect(() => {
+    if (systemSettings.length > 0) {
+      const defaultViewMode = getSystemSetting('default_view_mode', 'Day')
+      setViewMode(defaultViewMode)
+    }
+  }, [systemSettings, getSystemSetting])
 
   useEffect(() => {
     if (projectId) {
       console.log('Fetching WBS for project:', projectId)
-      fetchWBS({ project_id: projectId, limit: 1000 })
+      const itemsPerPage = getSystemSetting('items_per_page', 1000)
+      fetchWBS({ project_id: projectId, limit: itemsPerPage })
     }
-  }, [projectId, fetchWBS])
+  }, [projectId, fetchWBS, systemSettings, getSystemSetting])
 
   // Update URL when projectId changes
   useEffect(() => {
@@ -200,7 +208,10 @@ const GanttView = () => {
           {/* Reload Button */}
           <div className="mt-6">
             <button
-              onClick={() => fetchWBS({ project_id: projectId, limit: 1000 })}
+              onClick={() => {
+                const itemsPerPage = getSystemSetting('items_per_page', 1000)
+                fetchWBS({ project_id: projectId, limit: itemsPerPage })
+              }}
               className="btn-secondary"
               disabled={loading}
             >

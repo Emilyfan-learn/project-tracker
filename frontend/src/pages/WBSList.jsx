@@ -7,6 +7,7 @@ import { useWBS } from '../hooks/useWBS'
 import { useExcel } from '../hooks/useExcel'
 import { useProjects } from '../hooks/useProjects'
 import { useIssues } from '../hooks/useIssues'
+import { useSettings } from '../hooks/useSettings'
 import WBSForm from '../components/WBSForm'
 
 const WBSList = () => {
@@ -59,19 +60,24 @@ const WBSList = () => {
     fetchIssues,
   } = useIssues()
 
+  const { systemSettings, fetchSystemSettings, getSystemSetting } = useSettings()
+
   useEffect(() => {
     fetchProjects()
-  }, [fetchProjects])
+    fetchSystemSettings()
+  }, [fetchProjects, fetchSystemSettings])
 
   useEffect(() => {
     if (projectId) {
-      fetchIssues({ project_id: projectId, limit: 1000 })
+      const itemsPerPage = getSystemSetting('items_per_page', 1000)
+      fetchIssues({ project_id: projectId, limit: itemsPerPage })
     }
-  }, [fetchIssues, projectId])
+  }, [fetchIssues, projectId, systemSettings, getSystemSetting])
 
   useEffect(() => {
-    fetchWBS({ project_id: projectId, ...filters })
-  }, [fetchWBS, projectId, filters])
+    const itemsPerPage = getSystemSetting('items_per_page', 1000)
+    fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage })
+  }, [fetchWBS, projectId, filters, systemSettings, getSystemSetting])
 
   // Update URL when projectId changes
   useEffect(() => {
@@ -123,7 +129,8 @@ const WBSList = () => {
         await deleteWBS(item.item_id)
         alert('刪除成功')
         // Refresh the WBS list
-        fetchWBS({ project_id: projectId, ...filters })
+        const itemsPerPage = getSystemSetting('items_per_page', 1000)
+        fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage })
       } catch (err) {
         alert(`刪除失敗: ${err.message}`)
       }
@@ -147,7 +154,8 @@ const WBSList = () => {
         // 不關閉表單，讓用戶可以繼續新增
       }
       // Refresh the WBS list to show the new/updated item
-      fetchWBS({ project_id: projectId, ...filters })
+      const itemsPerPage = getSystemSetting('items_per_page', 1000)
+      fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage })
     } catch (err) {
       alert(`操作失敗: ${err.message}`)
     }
@@ -194,7 +202,8 @@ const WBSList = () => {
 
       // Refresh WBS list if any items were imported
       if (result.imported > 0) {
-        await fetchWBS({ project_id: projectId, ...filters })
+        const itemsPerPage = getSystemSetting('items_per_page', 1000)
+        await fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage })
       }
 
       // Reset file input
@@ -592,7 +601,10 @@ const WBSList = () => {
 
           <div className="mt-6">
             <button
-              onClick={() => fetchWBS({ project_id: projectId, ...filters })}
+              onClick={() => {
+                const itemsPerPage = getSystemSetting('items_per_page', 1000)
+                fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage })
+              }}
               className="btn-secondary"
             >
               搜尋
