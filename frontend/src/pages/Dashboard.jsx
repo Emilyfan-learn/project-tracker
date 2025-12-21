@@ -14,6 +14,7 @@ const Dashboard = () => {
     dependencies: { total: 0, active: 0 },
   })
   const [overdueItems, setOverdueItems] = useState([])
+  const [shouldStartItems, setShouldStartItems] = useState([])
   const [dueTodayItems, setDueTodayItems] = useState([])
   const [dueSoonItems, setDueSoonItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -149,8 +150,38 @@ const Dashboard = () => {
       ]
       setOverdueItems(overdue.slice(0, 5))
 
-      // Collect items due today
+      // Collect items that should have started but haven't
       const now = new Date()
+      const shouldStart = [
+        ...wbsItems
+          .filter((w) => {
+            // Skip completed items
+            if (w.status === '已完成') return false
+
+            // Get the planned start date (revised takes priority)
+            const startDate = w.revised_planned_start || w.original_planned_start
+            if (!startDate) return false
+
+            const plannedStart = new Date(startDate)
+
+            // Check if planned start date has passed
+            if (plannedStart > now) return false
+
+            // Check if not actually started (no actual start date OR status is still "未開始")
+            return !w.actual_start_date || w.status === '未開始'
+          })
+          .map((w) => ({
+            type: 'WBS',
+            id: w.wbs_id,
+            code: w.wbs_id,
+            name: w.task_name,
+            startDate: w.revised_planned_start || w.original_planned_start,
+            status: w.status,
+          })),
+      ]
+      setShouldStartItems(shouldStart.slice(0, 5))
+
+      // Collect items due today
       const today = new Date(now)
       today.setHours(0, 0, 0, 0)
       const tomorrow = new Date(today)
@@ -357,7 +388,7 @@ const Dashboard = () => {
         )}
 
         {/* Alert Sections */}
-        {(overdueItems.length > 0 || stats.issues.critical > 0) && (
+        {(overdueItems.length > 0 || shouldStartItems.length > 0 || stats.issues.critical > 0) && (
           <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Overdue Items */}
             {overdueItems.length > 0 && (
@@ -380,6 +411,34 @@ const Dashboard = () => {
                           {item.name}
                         </span>
                         <span className="text-red-600 text-xs">{item.dueDate}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Should Start Items */}
+            {shouldStartItems.length > 0 && (
+              <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                <div className="flex items-center mb-2">
+                  <span className="text-purple-600 font-semibold text-lg">🚀 應該開始而未開始 ({shouldStartItems.length})</span>
+                </div>
+                <div className="space-y-2">
+                  {shouldStartItems.map((item, idx) => {
+                    const linkTo = item.type === 'WBS' ? '/wbs' : item.type === 'Pending' ? '/pending' : '/issues'
+                    return (
+                      <Link
+                        key={idx}
+                        to={linkTo}
+                        className="flex justify-between items-center text-sm text-purple-800 hover:text-purple-900 hover:bg-purple-100 p-2 rounded transition-colors"
+                      >
+                        <span>
+                          <span className="font-semibold">[{item.type}]</span>
+                          <span className="text-purple-600 font-mono text-xs mx-2">[{item.code}]</span>
+                          {item.name}
+                        </span>
+                        <span className="text-purple-600 text-xs">{item.startDate}</span>
                       </Link>
                     )
                   })}
