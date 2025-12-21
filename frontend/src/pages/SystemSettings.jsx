@@ -18,7 +18,8 @@ const SystemSettings = () => {
 
   useEffect(() => {
     fetchSystemSettings()
-  }, [fetchSystemSettings])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     // Initialize form data from settings
