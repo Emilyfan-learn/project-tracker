@@ -16,8 +16,8 @@ export const useSettings = () => {
     setError(null)
     try {
       const response = await api.get('/settings/system')
-      setSystemSettings(response.data)
-      return response.data
+      setSystemSettings(response)
+      return response
     } catch (err) {
       setError(err.message)
       throw err
@@ -34,9 +34,9 @@ export const useSettings = () => {
       })
       // Update local state
       setSystemSettings(prev =>
-        prev.map(s => s.setting_key === settingKey ? response.data : s)
+        prev.map(s => s.setting_key === settingKey ? response : s)
       )
-      return response.data
+      return response
     } catch (err) {
       setError(err.message)
       throw err
@@ -64,8 +64,8 @@ export const useSettings = () => {
     try {
       const url = `/settings/project/${projectId}${settingKey ? `?setting_key=${settingKey}` : ''}`
       const response = await api.get(url)
-      setProjectSettings(response.data)
-      return response.data
+      setProjectSettings(response)
+      return response
     } catch (err) {
       setError(err.message)
       throw err
@@ -78,8 +78,8 @@ export const useSettings = () => {
   const createProjectSetting = useCallback(async (data) => {
     try {
       const response = await api.post('/settings/project', data)
-      setProjectSettings(prev => [...prev, response.data])
-      return response.data
+      setProjectSettings(prev => [...prev, response])
+      return response
     } catch (err) {
       setError(err.message)
       throw err
@@ -91,9 +91,9 @@ export const useSettings = () => {
     try {
       const response = await api.put(`/settings/project/${settingId}`, data)
       setProjectSettings(prev =>
-        prev.map(s => s.setting_id === settingId ? response.data : s)
+        prev.map(s => s.setting_id === settingId ? response : s)
       )
-      return response.data
+      return response
     } catch (err) {
       setError(err.message)
       throw err
@@ -115,7 +115,7 @@ export const useSettings = () => {
   const fetchOwnerUnits = useCallback(async (projectId) => {
     try {
       const response = await api.get(`/settings/owner-units/${projectId}`)
-      return response.data
+      return response
     } catch (err) {
       setError(err.message)
       throw err
@@ -130,7 +130,7 @@ export const useSettings = () => {
         unit_name: unitName,
         display_order: displayOrder
       })
-      return response.data
+      return response
     } catch (err) {
       setError(err.message)
       throw err
