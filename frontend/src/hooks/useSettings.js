@@ -15,7 +15,7 @@ export const useSettings = () => {
     setLoading(true)
     setError(null)
     try {
-      const response = await api.get('/api/settings/system')
+      const response = await api.get('/settings/system')
       setSystemSettings(response.data)
       return response.data
     } catch (err) {
@@ -29,7 +29,7 @@ export const useSettings = () => {
   // Update a system setting
   const updateSystemSetting = useCallback(async (settingKey, value) => {
     try {
-      const response = await api.put(`/api/settings/system/${settingKey}`, {
+      const response = await api.put(`/settings/system/${settingKey}`, {
         setting_value: value
       })
       // Update local state
@@ -62,7 +62,7 @@ export const useSettings = () => {
     setLoading(true)
     setError(null)
     try {
-      const url = `/api/settings/project/${projectId}${settingKey ? `?setting_key=${settingKey}` : ''}`
+      const url = `/settings/project/${projectId}${settingKey ? `?setting_key=${settingKey}` : ''}`
       const response = await api.get(url)
       setProjectSettings(response.data)
       return response.data
@@ -77,7 +77,7 @@ export const useSettings = () => {
   // Create project setting
   const createProjectSetting = useCallback(async (data) => {
     try {
-      const response = await api.post('/api/settings/project', data)
+      const response = await api.post('/settings/project', data)
       setProjectSettings(prev => [...prev, response.data])
       return response.data
     } catch (err) {
@@ -89,7 +89,7 @@ export const useSettings = () => {
   // Update project setting
   const updateProjectSetting = useCallback(async (settingId, data) => {
     try {
-      const response = await api.put(`/api/settings/project/${settingId}`, data)
+      const response = await api.put(`/settings/project/${settingId}`, data)
       setProjectSettings(prev =>
         prev.map(s => s.setting_id === settingId ? response.data : s)
       )
@@ -103,7 +103,7 @@ export const useSettings = () => {
   // Delete project setting
   const deleteProjectSetting = useCallback(async (settingId) => {
     try {
-      await api.delete(`/api/settings/project/${settingId}`)
+      await api.delete(`/settings/project/${settingId}`)
       setProjectSettings(prev => prev.filter(s => s.setting_id !== settingId))
     } catch (err) {
       setError(err.message)
@@ -114,7 +114,7 @@ export const useSettings = () => {
   // Fetch owner units for a project
   const fetchOwnerUnits = useCallback(async (projectId) => {
     try {
-      const response = await api.get(`/api/settings/owner-units/${projectId}`)
+      const response = await api.get(`/settings/owner-units/${projectId}`)
       return response.data
     } catch (err) {
       setError(err.message)
@@ -125,7 +125,7 @@ export const useSettings = () => {
   // Add owner unit
   const addOwnerUnit = useCallback(async (projectId, unitName, displayOrder = 0) => {
     try {
-      const response = await api.post('/api/settings/owner-units', {
+      const response = await api.post('/settings/owner-units', {
         project_id: projectId,
         unit_name: unitName,
         display_order: displayOrder
