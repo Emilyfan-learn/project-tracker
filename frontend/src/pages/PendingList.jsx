@@ -27,7 +27,7 @@ const PendingList = () => {
     internalOnly: false,
     overdueOnly: false,
     dueThisWeek: false,
-    notReplied: false,
+    notCompleted: false,
     dateRange: '', // 日期區間選項
   })
 
@@ -203,9 +203,11 @@ const PendingList = () => {
       })
     }
 
-    // Filter: Not replied
-    if (smartFilters.notReplied) {
-      filtered = filtered.filter((item) => !item.is_replied)
+    // Filter: Not completed (待處理或處理中)
+    if (smartFilters.notCompleted) {
+      filtered = filtered.filter((item) =>
+        item.status === '待處理' || item.status === '處理中'
+      )
     }
 
     // Filter: Date range
@@ -459,13 +461,13 @@ const PendingList = () => {
             <label className="flex items-center text-sm">
               <input
                 type="checkbox"
-                checked={smartFilters.notReplied}
+                checked={smartFilters.notCompleted}
                 onChange={(e) =>
-                  setSmartFilters({ ...smartFilters, notReplied: e.target.checked })
+                  setSmartFilters({ ...smartFilters, notCompleted: e.target.checked })
                 }
                 className="mr-2 rounded"
               />
-              <span className="text-gray-700">只看未回覆</span>
+              <span className="text-gray-700">只看未完成</span>
             </label>
 
             {/* Date Range Filter */}
@@ -501,7 +503,7 @@ const PendingList = () => {
                     internalOnly: false,
                     overdueOnly: false,
                     dueThisWeek: false,
-                    notReplied: false,
+                    notCompleted: false,
                     dateRange: '',
                   })
                 }
