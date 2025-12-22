@@ -28,9 +28,9 @@ class PendingService:
         is_overdue = False
         days_until_due = None
 
-        if item.get('expected_reply_date') and not item.get('is_replied'):
+        if item.get('expected_completion_date') and not item.get('is_replied'):
             try:
-                expected_date = datetime.strptime(item['expected_reply_date'], '%Y-%m-%d').date()
+                expected_date = datetime.strptime(item['expected_completion_date'], '%Y-%m-%d').date()
                 today = date.today()
 
                 is_overdue = today > expected_date
@@ -51,17 +51,18 @@ class PendingService:
         cursor.execute("""
             INSERT INTO pending_items (
                 project_id, task_date, source_type, contact_info, description,
-                expected_reply_date, handling_notes,
+                planned_start_date, expected_completion_date, handling_notes,
                 related_wbs, related_action_item, related_issue_id,
                 status, priority
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             pending_data.project_id,
             pending_data.task_date,
             pending_data.source_type,
             pending_data.contact_info,
             pending_data.description,
-            pending_data.expected_reply_date,
+            pending_data.planned_start_date,
+            pending_data.expected_completion_date,
             pending_data.handling_notes,
             pending_data.related_wbs,
             pending_data.related_action_item,
@@ -246,7 +247,7 @@ class PendingService:
         """Mark pending item as replied"""
         update_data = PendingUpdate(
             is_replied=True,
-            actual_reply_date=date.today(),
+            actual_completion_date=date.today(),
             status="已完成"
         )
         return self.update_pending(pending_id, update_data)
@@ -274,7 +275,7 @@ class PendingService:
                 SUM(CASE WHEN status = '已取消' THEN 1 ELSE 0 END) as cancelled,
                 SUM(CASE WHEN is_replied = 1 THEN 1 ELSE 0 END) as replied,
                 SUM(CASE WHEN is_replied = 0 THEN 1 ELSE 0 END) as not_replied,
-                SUM(CASE WHEN expected_reply_date < date('now') AND is_replied = 0 THEN 1 ELSE 0 END) as overdue,
+                SUM(CASE WHEN expected_completion_date < date('now') AND is_replied = 0 THEN 1 ELSE 0 END) as overdue,
                 SUM(CASE WHEN priority = 'High' THEN 1 ELSE 0 END) as high_priority,
                 SUM(CASE WHEN priority = 'Medium' THEN 1 ELSE 0 END) as medium_priority,
                 SUM(CASE WHEN priority = 'Low' THEN 1 ELSE 0 END) as low_priority
@@ -319,7 +320,7 @@ class PendingService:
 
         query = """
             SELECT * FROM pending_items
-            WHERE expected_reply_date < date('now')
+            WHERE expected_completion_date < date('now')
             AND is_replied = 0
             AND status NOT IN ('已完成', '已取消')
         """
@@ -329,7 +330,7 @@ class PendingService:
             query += " AND project_id = ?"
             params.append(project_id)
 
-        query += " ORDER BY expected_reply_date ASC"
+        query += " ORDER BY expected_completion_date ASC"
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
@@ -372,7 +373,7 @@ class PendingService:
         # Update pending_items to mark as replied (for backward compatibility)
         cursor.execute("""
             UPDATE pending_items
-            SET is_replied = 1, actual_reply_date = ?
+            SET is_replied = 1, actual_completion_date = ?
             WHERE pending_id = ?
         """, (reply_data.reply_date, pending_id))
 
