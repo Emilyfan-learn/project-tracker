@@ -197,8 +197,8 @@ const PendingList = () => {
       weekFromNow.setDate(today.getDate() + 7)
 
       filtered = filtered.filter((item) => {
-        if (!item.expected_reply_date) return false
-        const dueDate = new Date(item.expected_reply_date)
+        if (!item.expected_completion_date) return false
+        const dueDate = new Date(item.expected_completion_date)
         return dueDate >= today && dueDate <= weekFromNow
       })
     }
@@ -546,16 +546,19 @@ const PendingList = () => {
                     說明
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    預計回覆
+                    預計開始
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    預計完成
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    實際完成
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     優先級
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     狀態
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    回覆狀態
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     操作
@@ -565,7 +568,7 @@ const PendingList = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredPendingList.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="9" className="px-6 py-4 text-center text-gray-500">
                       {pendingList.length === 0 ? '暫無資料' : '無符合篩選條件的資料'}
                     </td>
                   </tr>
@@ -597,12 +600,18 @@ const PendingList = () => {
                         )}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.expected_reply_date || '-'}
+                        {item.planned_start_date || '-'}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.expected_completion_date || '-'}
                         {item.days_until_due !== null && item.days_until_due < 0 && (
                           <span className="ml-2 text-red-600 text-xs">
                             (逾期 {Math.abs(item.days_until_due)} 天)
                           </span>
                         )}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.actual_completion_date || '-'}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <span
@@ -621,18 +630,6 @@ const PendingList = () => {
                         >
                           {item.status}
                         </span>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => {
-                            setSelectedItem(item)
-                            setShowReplyModal(true)
-                          }}
-                          className="text-blue-600 hover:text-blue-900 underline"
-                        >
-                          查看回覆
-                          {item.is_replied && <span className="text-green-600 ml-1">✓</span>}
-                        </button>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                         <button
