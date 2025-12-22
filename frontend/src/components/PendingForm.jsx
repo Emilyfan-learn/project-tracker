@@ -13,7 +13,8 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
     source_type: '客戶',
     contact_info: '',
     description: '',
-    expected_reply_date: '',
+    planned_start_date: '',
+    expected_completion_date: '',
     handling_notes: '',
     related_wbs: '',
     related_action_item: '',
@@ -48,7 +49,8 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
       setFormData({
         ...initialData,
         task_date: initialData.task_date || '',
-        expected_reply_date: initialData.expected_reply_date || '',
+        planned_start_date: initialData.planned_start_date || '',
+        expected_completion_date: initialData.expected_completion_date || '',
         related_issue_id: initialData.related_issue_id || '',
       })
     }
@@ -242,16 +244,31 @@ const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
           )}
         </div>
 
-        {/* Expected Reply Date */}
+        {/* Planned Start Date */}
         <div>
-          <label htmlFor="expected_reply_date" className="label">
-            預計回覆日期
+          <label htmlFor="planned_start_date" className="label">
+            預計開始日期
           </label>
           <input
             type="date"
-            id="expected_reply_date"
-            name="expected_reply_date"
-            value={formData.expected_reply_date}
+            id="planned_start_date"
+            name="planned_start_date"
+            value={formData.planned_start_date}
+            onChange={handleChange}
+            className="input-field"
+          />
+        </div>
+
+        {/* Expected Completion Date */}
+        <div>
+          <label htmlFor="expected_completion_date" className="label">
+            預計完成日期
+          </label>
+          <input
+            type="date"
+            id="expected_completion_date"
+            name="expected_completion_date"
+            value={formData.expected_completion_date}
             onChange={handleChange}
             className="input-field"
           />

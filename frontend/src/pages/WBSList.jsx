@@ -77,8 +77,8 @@ const WBSList = () => {
 
   useEffect(() => {
     const itemsPerPage = getSystemSetting('items_per_page', 1000)
-    const offset = (currentPage - 1) * itemsPerPage
-    fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage, offset })
+    const skip = (currentPage - 1) * itemsPerPage
+    fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage, skip })
   }, [fetchWBS, projectId, filters, currentPage, systemSettings, getSystemSetting])
 
   // Reset to page 1 when filters change
@@ -610,8 +610,8 @@ const WBSList = () => {
             <button
               onClick={() => {
                 const itemsPerPage = getSystemSetting('items_per_page', 1000)
-                const offset = (currentPage - 1) * itemsPerPage
-                fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage, offset })
+                const skip = (currentPage - 1) * itemsPerPage
+                fetchWBS({ project_id: projectId, ...filters, limit: itemsPerPage, skip })
               }}
               className="btn-secondary"
             >

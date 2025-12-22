@@ -13,7 +13,8 @@ class PendingBase(BaseModel):
     contact_info: Optional[str] = Field(None, description="Contact information")
     description: str = Field(..., description="Task description")
 
-    expected_reply_date: Optional[date] = Field(None, description="Expected reply date")
+    planned_start_date: Optional[date] = Field(None, description="預計開始日期")
+    expected_completion_date: Optional[date] = Field(None, description="預計完成日期")
     handling_notes: Optional[str] = Field(None, description="Handling notes")
 
     related_wbs: Optional[str] = Field(None, description="Related WBS ID")
@@ -36,9 +37,10 @@ class PendingUpdate(BaseModel):
     contact_info: Optional[str] = None
     description: Optional[str] = None
 
-    expected_reply_date: Optional[date] = None
+    planned_start_date: Optional[date] = None
+    expected_completion_date: Optional[date] = None
     is_replied: Optional[bool] = None
-    actual_reply_date: Optional[date] = None
+    actual_completion_date: Optional[date] = None
     handling_notes: Optional[str] = None
 
     related_wbs: Optional[str] = None
@@ -55,7 +57,7 @@ class PendingResponse(PendingBase):
     project_id: str
 
     is_replied: bool = False
-    actual_reply_date: Optional[date] = None
+    actual_completion_date: Optional[date] = None
 
     # Calculated fields
     is_overdue: bool = False
