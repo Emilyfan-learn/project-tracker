@@ -7,9 +7,18 @@ import { useIssues } from '../hooks/useIssues'
 import { useProjects } from '../hooks/useProjects'
 
 const PendingForm = ({ initialData = null, onSubmit, onCancel, projectId }) => {
+  // 獲取今天日期 (YYYY-MM-DD 格式)
+  const getTodayDate = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const [formData, setFormData] = useState({
     project_id: projectId || '',
-    task_date: '',
+    task_date: getTodayDate(), // 預設為今天
     source_type: '客戶',
     contact_info: '',
     description: '',
