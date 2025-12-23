@@ -66,19 +66,31 @@ project-tracker/
 
 ## 🚀 快速開始
 
-### 前置需求
+### 系統需求
 
-- Python 3.9+
-- Node.js 18+
-- npm 或 yarn
+| 項目 | 需求 | 說明 |
+|------|------|------|
+| **作業系統** | Mac / Linux / Windows | 支援主流作業系統 |
+| **Python** | 3.9+ | 建議使用 3.11 |
+| **Node.js** | 18+ | 建議使用 LTS 版本 |
+| **npm** | 10+ | 隨 Node.js 安裝 |
+| **磁碟空間** | 500MB+ | 包含依賴套件 |
+| **記憶體** | 2GB+ | 建議 4GB 以上 |
 
-### 安裝步驟
+### 完整安裝步驟
 
-#### 1. 安裝後端依賴
+#### 步驟 1: 克隆專案
 
 ```bash
-# 建立虛擬環境
-python -m venv venv
+git clone https://github.com/Emilyfan-learn/project-tracker.git
+cd project-tracker
+```
+
+#### 步驟 2: 安裝後端依賴
+
+```bash
+# 建立 Python 虛擬環境（可選但建議）
+python3 -m venv venv
 
 # 啟動虛擬環境
 # Mac/Linux:
@@ -86,59 +98,207 @@ source venv/bin/activate
 # Windows:
 venv\Scripts\activate
 
-# 安裝依賴
+# 安裝 Python 依賴套件
 pip install -r requirements.txt
 ```
 
-#### 2. 初始化資料庫
+**主要依賴套件：**
+- FastAPI - Web 框架
+- uvicorn - ASGI 伺服器
+- pandas - 資料處理
+- openpyxl - Excel 處理
+- pydantic - 資料驗證
 
-```bash
-python backend/init_db.py
-```
-
-#### 3. 安裝前端依賴
+#### 步驟 3: 安裝前端依賴
 
 ```bash
 cd frontend
 npm install
+cd ..
 ```
 
-### 開發模式
+**主要依賴套件：**
+- React - UI 框架
+- Vite - 建置工具
+- Tailwind CSS - CSS 框架
+- Recharts - 圖表庫
+- frappe-gantt - 甘特圖
 
-#### 啟動後端服務
+#### 步驟 4: 初始化資料庫
+
+資料庫會在應用啟動時自動創建，但你也可以手動初始化：
+
+```bash
+python3 backend/init_db.py
+```
+
+這會創建 SQLite 資料庫檔案於 `data/project_tracking.db`
+
+### 🎯 一鍵式啟動（推薦）
+
+我們提供了便捷的啟動腳本，可以一鍵啟動前端和後端服務：
+
+#### 啟動服務
+
+```bash
+./restart.sh
+```
+
+這個腳本會自動：
+1. ✓ 停止現有的前端和後端進程
+2. ✓ 檢查環境依賴（Python3, Node.js, npm）
+3. ✓ 啟動後端服務（http://localhost:8000）
+4. ✓ 啟動前端服務（http://localhost:5173）
+5. ✓ 顯示服務狀態和日誌位置
+
+#### 停止服務
+
+```bash
+./stop.sh
+```
+
+#### 查看服務日誌
+
+```bash
+# 查看後端日誌
+tail -f logs/backend.log
+
+# 查看前端日誌
+tail -f logs/frontend.log
+```
+
+### 🛠 手動啟動（開發模式）
+
+如果你不想使用一鍵式腳本，可以手動啟動：
+
+#### 啟動後端
 
 ```bash
 # 在專案根目錄
-python backend/main.py
+python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-後端服務將在 `http://localhost:8000` 啟動
+後端服務：`http://localhost:8000`
+- API 文件：`http://localhost:8000/docs`
+- 健康檢查：`http://localhost:8000/health`
 
-#### 啟動前端開發伺服器
+#### 啟動前端
 
 ```bash
-# 在 frontend 目錄
+# 開啟新終端機，進入 frontend 目錄
+cd frontend
 npm run dev
 ```
 
-前端開發伺服器將在 `http://localhost:5173` 啟動
+前端服務：`http://localhost:5173`
 
-### 生產部署
+### 📦 生產部署
 
-#### 1. 打包前端
+#### 方式 1: 使用打包的靜態文件
 
 ```bash
+# 1. 打包前端
 cd frontend
 npm run build
-```
+cd ..
 
-#### 2. 啟動後端（含靜態檔案服務）
-
-```bash
-python backend/main.py
+# 2. 啟動後端（會自動服務前端靜態文件）
+python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
 
 訪問 `http://localhost:8000` 即可使用完整應用
+
+#### 方式 2: 使用 Docker（如需要）
+
+```bash
+# 構建映像
+docker-compose build
+
+# 啟動服務
+docker-compose up -d
+```
+
+### ✅ 驗證安裝
+
+啟動服務後，請確認以下項目：
+
+1. **後端健康檢查**
+   ```bash
+   curl http://localhost:8000/health
+   # 應該返回: {"status":"healthy","database":"True"}
+   ```
+
+2. **前端頁面**
+   - 在瀏覽器打開 `http://localhost:5173`
+   - 應該能看到專案追蹤系統首頁
+
+3. **資料庫**
+   ```bash
+   ls -lh data/project_tracking.db
+   # 應該看到資料庫文件
+   ```
+
+### 🔧 常見問題
+
+#### Q1: 執行 `./restart.sh` 時顯示權限錯誤
+
+```bash
+# 賦予執行權限
+chmod +x restart.sh stop.sh
+```
+
+#### Q2: Python 找不到模組
+
+```bash
+# 確保你已啟動虛擬環境
+source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate     # Windows
+
+# 重新安裝依賴
+pip install -r requirements.txt
+```
+
+#### Q3: 前端無法連接後端 API
+
+檢查 `frontend/vite.config.js` 中的代理設定：
+```javascript
+proxy: {
+  '/api': {
+    target: 'http://localhost:8000',
+    changeOrigin: true,
+  },
+}
+```
+
+#### Q4: 資料庫表不存在
+
+應用啟動時會自動創建表，但如果遇到問題：
+```bash
+# 手動初始化資料庫
+python3 backend/init_db.py
+
+# 或重啟服務
+./restart.sh
+```
+
+#### Q5: 端口被占用
+
+```bash
+# 查找占用 8000 端口的進程
+lsof -i :8000    # Mac/Linux
+netstat -ano | findstr :8000  # Windows
+
+# 停止進程
+kill <PID>       # Mac/Linux
+taskkill /PID <PID> /F  # Windows
+```
+
+### 📂 資料存放位置
+
+- **資料庫**: `data/project_tracking.db`
+- **備份**: `data/backups/`
+- **日誌**: `logs/backend.log`, `logs/frontend.log`
+- **PID 文件**: `logs/backend.pid`, `logs/frontend.pid`
 
 ## 📊 資料庫架構
 
