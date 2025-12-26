@@ -56,8 +56,8 @@ const Dashboard = () => {
       const inProgressPending = pendingItems.filter((p) => p.status === '處理中').length
       const completedPending = pendingItems.filter((p) => p.status === '已完成').length
       const overduePending = pendingItems.filter((p) => {
-        if (!p.expected_reply_date || p.status === '已完成') return false
-        const dueDate = new Date(p.expected_reply_date)
+        if (!p.expected_completion_date || p.status === '已完成') return false
+        const dueDate = new Date(p.expected_completion_date)
         return dueDate < new Date()
       }).length
 
@@ -122,8 +122,8 @@ const Dashboard = () => {
           })),
         ...pendingItems
           .filter((p) => {
-            if (!p.expected_reply_date || p.status === '已完成') return false
-            const dueDate = new Date(p.expected_reply_date)
+            if (!p.expected_completion_date || p.status === '已完成') return false
+            const dueDate = new Date(p.expected_completion_date)
             return dueDate < new Date()
           })
           .map((p) => ({
@@ -131,7 +131,7 @@ const Dashboard = () => {
             id: p.pending_id,
             code: p.pending_id,
             name: p.description,
-            dueDate: p.expected_reply_date,
+            dueDate: p.expected_completion_date,
             status: p.status,
             projectId: p.project_id,
           })),
@@ -210,8 +210,8 @@ const Dashboard = () => {
           })),
         ...pendingItems
           .filter((p) => {
-            if (!p.expected_reply_date || p.status === '已完成') return false
-            const dueDate = new Date(p.expected_reply_date)
+            if (!p.expected_completion_date || p.status === '已完成') return false
+            const dueDate = new Date(p.expected_completion_date)
             dueDate.setHours(0, 0, 0, 0)
             return dueDate.getTime() === today.getTime()
           })
@@ -220,7 +220,7 @@ const Dashboard = () => {
             id: p.pending_id,
             code: p.pending_id,
             name: p.description,
-            dueDate: p.expected_reply_date,
+            dueDate: p.expected_completion_date,
             status: p.status,
             projectId: p.project_id,
           })),
@@ -263,8 +263,8 @@ const Dashboard = () => {
           })),
         ...pendingItems
           .filter((p) => {
-            if (!p.expected_reply_date || p.status === '已完成') return false
-            const dueDate = new Date(p.expected_reply_date)
+            if (!p.expected_completion_date || p.status === '已完成') return false
+            const dueDate = new Date(p.expected_completion_date)
             return dueDate > now && dueDate <= sevenDaysLater
           })
           .map((p) => ({
@@ -272,9 +272,24 @@ const Dashboard = () => {
             id: p.pending_id,
             code: p.pending_id,
             name: p.description,
-            dueDate: p.expected_reply_date,
-            daysUntilDue: Math.ceil((new Date(p.expected_reply_date) - now) / (1000 * 60 * 60 * 24)),
+            dueDate: p.expected_completion_date,
+            daysUntilDue: Math.ceil((new Date(p.expected_completion_date) - now) / (1000 * 60 * 60 * 24)),
             projectId: p.project_id,
+          })),
+        ...issueItems
+          .filter((i) => {
+            if (!i.target_resolution_date || i.status === 'Resolved' || i.status === 'Closed') return false
+            const dueDate = new Date(i.target_resolution_date)
+            return dueDate > now && dueDate <= sevenDaysLater
+          })
+          .map((i) => ({
+            type: 'Issue',
+            id: i.issue_id,
+            code: i.issue_number,
+            name: i.issue_title,
+            dueDate: i.target_resolution_date,
+            daysUntilDue: Math.ceil((new Date(i.target_resolution_date) - now) / (1000 * 60 * 60 * 24)),
+            projectId: i.project_id,
           })),
       ]
       setDueSoonItems(dueSoon.slice(0, 5))
